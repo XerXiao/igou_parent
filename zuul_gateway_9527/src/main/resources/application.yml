@@ -1,0 +1,22 @@
+server:
+  port: 9527
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+      instance-id: gateway-9527.com
+      prefer-ip-address: false
+zuul:
+  routes:
+    #配置别名，只要用户输入/user/之类的路径名则映射到设置的服务名上
+    plat.serviceId: plat-service
+    plat.path: "/plat/**"
+  #配置禁用使用服务名访问服务，如果不进行配置，使用别名、服务名都可以访问到服务
+  #这里配置*指禁用所有的服务使用服务名访问，否则需要一个一个配置
+  ignored-services: "*"
+  #设置访问前缀
+  prefix: /services
+spring:
+  application:
+    name: zuul-gateway

@@ -1,0 +1,13 @@
+server:
+  port: 7001
+eureka:
+  instance:
+    hostname: igou
+  client:
+    #是否注册到eureka中心
+    register-with-eureka: false
+    #是否从注册中心获取注册信息
+    fetch-registry: false
+    serviceUrl:
+      #单机配置
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka
