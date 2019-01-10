@@ -1,0 +1,20 @@
+server:
+  port: 8848
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+      instance-id: config-server.com
+      prefer-ip-address: true
+spring:
+  application:
+    #服务名称显示修改,不要使用下划线
+    name: igou-config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/XerXiao/igou-config.git
+          username: XerXiao
+          password: yujian@myk1995

@@ -2,7 +2,7 @@ server:
   port: 7001
 eureka:
   instance:
-    hostname: igou
+    hostname: localhost
   client:
     #是否注册到eureka中心
     register-with-eureka: false
