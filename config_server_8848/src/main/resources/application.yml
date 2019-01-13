@@ -8,12 +8,19 @@ eureka:
       instance-id: config-server.com
       prefer-ip-address: true
 spring:
+#  profiles:
+#    #配置中心使用本地配置文件
+#    active: native
+
   application:
     #服务名称显示修改,不要使用下划线
     name: igou-config-server
   cloud:
     config:
       server:
+        #配置中心使用本地配置文件，无网状态使用
+#        native:
+#          search-locations: F:/git/repository/igou-config
         git:
           uri: https://github.com/XerXiao/igou-config.git
           username: XerXiao

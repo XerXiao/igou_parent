@@ -44,7 +44,7 @@ public class AjaxResult {
     }
 
     public AjaxResult setResultObject(Object resultObject) {
-        resultObject = resultObject;
+        this.resultObject = resultObject;
         return this;
     }
 

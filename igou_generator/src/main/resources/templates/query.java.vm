@@ -1,0 +1,10 @@
+package com.xer.igou.query;
+
+
+/**
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+public class ${table.entityName}Query extends BaseQuery{
+}
