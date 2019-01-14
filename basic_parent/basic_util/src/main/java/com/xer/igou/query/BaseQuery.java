@@ -5,8 +5,17 @@ package com.xer.igou.query;
  */
 public class BaseQuery {
 
-    private Integer page;
-    private Integer rows;
+    private String keyword;
+    private Integer page = 1;
+    private Integer rows = 10;
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
 
     public Integer getPage() {
         return page;

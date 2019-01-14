@@ -10,10 +10,10 @@
         <result column="name" property="name" />
         <result column="subName" property="subName" />
         <result column="code" property="code" />
-        <result column="productType" property="productType" />
+        <result column="product_type_id" property="productTypeId" />
         <result column="onSaleTime" property="onSaleTime" />
         <result column="offSaleTime" property="offSaleTime" />
-        <result column="brandId" property="brandId" />
+        <result column="brand_id" property="brandId" />
         <result column="state" property="state" />
         <result column="maxPrice" property="maxPrice" />
         <result column="minPrice" property="minPrice" />
@@ -26,5 +26,68 @@
         <result column="commonCommentCount" property="commonCommentCount" />
         <result column="badCommentCount" property="badCommentCount" />
     </resultMap>
+
+
+    <!--List<Product> getAllProducts(Page<Product> page, ProductQuery query);-->
+    <select id="getAllProducts" parameterType="ProductQuery" resultMap="productMap">
+        SELECT
+          p.*,
+          type.id   pid,
+          type.name pname,
+          type.path path,
+          brand.id    bid,
+          brand.name  bname
+        FROM t_product p LEFT JOIN t_product_type type ON p.product_type_id = type.id
+          INNER JOIN t_brand brand ON p.brand_id = brand.id
+          <include refid="whereSql"></include>
+    </select>
+    <sql id="whereSql">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND p.name LIKE CONCAT("%",#{keyword},"%")
+            </if>
+        </where>
+    </sql>
+
+
+
+
+    <resultMap id="productMap" type="Product">
+        <!--基础属性-->
+        <id column="id" property="id" />
+        <result column="createTime" property="createTime" />
+        <result column="updateTime" property="updateTime" />
+        <result column="name" property="name" />
+        <result column="subName" property="subName" />
+        <result column="code" property="code" />
+        <result column="product_type_id" property="productTypeId" />
+        <result column="onSaleTime" property="onSaleTime" />
+        <result column="offSaleTime" property="offSaleTime" />
+        <result column="brand_id" property="brandId" />
+        <result column="state" property="state" />
+        <result column="maxPrice" property="maxPrice" />
+        <result column="minPrice" property="minPrice" />
+        <result column="saleCount" property="saleCount" />
+        <result column="viewCount" property="viewCount" />
+        <result column="commentCount" property="commentCount" />
+        <result column="commentScore" property="commentScore" />
+        <result column="viewProperties" property="viewProperties" />
+        <result column="goodCommentCount" property="goodCommentCount" />
+        <result column="commonCommentCount" property="commonCommentCount" />
+        <result column="badCommentCount" property="badCommentCount" />
+
+        <!--关联属性-->
+        <association property="productType" javaType="ProductType">
+            <id column="pid" property="id" />
+            <result column="pname" property="name" />
+            <result column="path" property="path"/>
+        </association>
+        <association property="brand" javaType="Brand">
+            <id column="bid" property="id" />
+            <result column="bname" property="name" />
+        </association>
+    </resultMap>
+
+
 
 </mapper>

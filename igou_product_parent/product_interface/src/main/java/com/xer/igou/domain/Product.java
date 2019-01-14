@@ -2,9 +2,14 @@ package com.xer.igou.domain;
 
 import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -12,7 +17,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author xer
- * @since 2019-01-12
+ * @since 2019-01-13
  */
 @TableName("t_product")
 public class Product extends Model<Product> {
@@ -21,8 +26,8 @@ public class Product extends Model<Product> {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    private Long createTime;
-    private Long updateTime;
+    private Date createTime;
+    private Date updateTime;
     /**
      * 商品名称
      */
@@ -38,16 +43,35 @@ public class Product extends Model<Product> {
     /**
      * 商品类型ID
      */
-    private Long productType;
+    @TableField("product_type_id")
+    private Long productTypeId;
+
+    /**
+     * 商品类型关联对象，不需要映射到数据库
+     */
+    @TableField(exist = false)
+    private ProductType productType;
+
     /**
      * 上架时间
      */
-    private Long onSaleTime;
+    private Date onSaleTime;
     /**
      * 下架时间
      */
-    private Long offSaleTime;
+    private Date offSaleTime;
+
+    /**
+     * 商品品牌
+     */
+    @TableField("brand_id")
     private Long brandId;
+
+    /**
+     * 商品品牌关联对象
+     */
+    @TableField(exist = false)
+    private Brand brand;
     /**
      * 状态
      */
@@ -92,20 +116,21 @@ public class Product extends Model<Product> {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public Long getCreateTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Long createTime) {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
-
-    public Long getUpdateTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
+    public Date getUpdateTime() {
         return updateTime;
     }
-
-    public void setUpdateTime(Long updateTime) {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
 
@@ -133,27 +158,27 @@ public class Product extends Model<Product> {
         this.code = code;
     }
 
-    public Long getProductType() {
-        return productType;
+    public Long getProductTypeId() {
+        return productTypeId;
     }
 
-    public void setProductType(Long productType) {
-        this.productType = productType;
+    public void setProductTypeId(Long productTypeId) {
+        this.productTypeId = productTypeId;
     }
-
-    public Long getOnSaleTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
+    public Date getOnSaleTime() {
         return onSaleTime;
     }
-
-    public void setOnSaleTime(Long onSaleTime) {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    public void setOnSaleTime(Date onSaleTime) {
         this.onSaleTime = onSaleTime;
     }
-
-    public Long getOffSaleTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
+    public Date getOffSaleTime() {
         return offSaleTime;
     }
-
-    public void setOffSaleTime(Long offSaleTime) {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    public void setOffSaleTime(Date offSaleTime) {
         this.offSaleTime = offSaleTime;
     }
 
@@ -253,6 +278,22 @@ public class Product extends Model<Product> {
         this.badCommentCount = badCommentCount;
     }
 
+    public ProductType getProductType() {
+        return productType;
+    }
+
+    public void setProductType(ProductType productType) {
+        this.productType = productType;
+    }
+
+    public Brand getBrand() {
+        return brand;
+    }
+
+    public void setBrand(Brand brand) {
+        this.brand = brand;
+    }
+
     @Override
     protected Serializable pkVal() {
         return this.id;
@@ -267,7 +308,7 @@ public class Product extends Model<Product> {
         ", name=" + name +
         ", subName=" + subName +
         ", code=" + code +
-        ", productType=" + productType +
+        ", productTypeId=" + productTypeId +
         ", onSaleTime=" + onSaleTime +
         ", offSaleTime=" + offSaleTime +
         ", brandId=" + brandId +

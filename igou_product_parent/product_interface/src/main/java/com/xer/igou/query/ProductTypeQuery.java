@@ -6,5 +6,5 @@ package com.xer.igou.query;
  * @author xer
  * @since 2019-01-13
  */
-public class ProductQuery extends BaseQuery{
+public class ProductTypeQuery extends BaseQuery{
 }

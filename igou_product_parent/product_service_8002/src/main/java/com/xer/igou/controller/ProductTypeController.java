@@ -1,8 +1,8 @@
-package ${package.Controller};
+package com.xer.igou.controller;
 
-import ${package.Service}.${table.serviceName};
-import ${package.Entity}.${entity};
-import com.xer.igou.query.${entity}Query;
+import com.xer.igou.service.IProductTypeService;
+import com.xer.igou.domain.ProductType;
+import com.xer.igou.query.ProductTypeQuery;
 import com.xer.igou.util.AjaxResult;
 import com.xer.igou.util.PageList;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -12,23 +12,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/${table.entityPath}")
-public class ${entity}Controller {
+@RequestMapping("/productType")
+public class ProductTypeController {
     @Autowired
-    public ${table.serviceName} ${table.entityPath}Service;
+    public IProductTypeService productTypeService;
 
     /**
     * 保存和修改公用的
-    * @param ${table.entityPath}  传递的实体
+    * @param productType  传递的实体
     * @return Ajaxresult转换结果
     */
     @RequestMapping(value="/add",method= RequestMethod.POST)
-    public AjaxResult save(@RequestBody ${entity} ${table.entityPath}){
+    public AjaxResult save(@RequestBody ProductType productType){
         try {
-            if(${table.entityPath}.getId()!=null){
-                ${table.entityPath}Service.updateById(${table.entityPath});
+            if(productType.getId()!=null){
+                productTypeService.updateById(productType);
             }else{
-                ${table.entityPath}Service.insert(${table.entityPath});
+                productTypeService.insert(productType);
             }
             return AjaxResult.me();
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public class ${entity}Controller {
     @RequestMapping(value="/delete/{id}",method=RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable("id") Long id){
         try {
-            ${table.entityPath}Service.deleteById(id);
+            productTypeService.deleteById(id);
             return AjaxResult.me();
         } catch (Exception e) {
         e.printStackTrace();
@@ -55,20 +55,20 @@ public class ${entity}Controller {
 
     //获取用户
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
-    public ${entity} get(@PathVariable(value="id",required=true) Long id)
+    public ProductType get(@PathVariable(value="id",required=true) Long id)
     {
-        return ${table.entityPath}Service.selectById(id);
+        return productTypeService.selectById(id);
     }
 
 
     /**
-    * 查看所有的员工信息
+    * 查看所有的分类信息
     * @return
     */
     @RequestMapping(value = "/list",method = RequestMethod.GET)
-    public List<${entity}> list(){
+    public List<ProductType> list(){
 
-        return ${table.entityPath}Service.selectList(null);
+        return productTypeService.selectList(null);
     }
 
 
@@ -79,10 +79,19 @@ public class ${entity}Controller {
     * @return PageList 分页对象
     */
     @RequestMapping(value = "/json",method = RequestMethod.POST)
-    public PageList<${entity}> json(@RequestBody ${entity}Query query)
+    public PageList<ProductType> json(@RequestBody ProductTypeQuery query)
     {
-        Page<${entity}> page = new Page<${entity}>(query.getPage(),query.getRows());
-            page = ${table.entityPath}Service.selectPage(page);
-            return new PageList<${entity}>(page.getTotal(),page.getRecords());
+        Page<ProductType> page = new Page<ProductType>(query.getPage(),query.getRows());
+            page = productTypeService.selectPage(page);
+            return new PageList<ProductType>(page.getTotal(),page.getRecords());
+    }
+
+    /**
+     * 获取分类信息表
+     * @return
+     */
+    @RequestMapping(value = "/treeData",method = RequestMethod.GET)
+    public List<ProductType> productTypeInfo() {
+        return productTypeService.getDataTree();
     }
 }
