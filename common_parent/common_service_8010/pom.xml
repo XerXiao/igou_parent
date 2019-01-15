@@ -3,36 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>igou_product_parent</artifactId>
+        <artifactId>common_parent</artifactId>
         <groupId>com.xer.igou</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>product_service_8002</artifactId>
+    <artifactId>common_service_8010</artifactId>
 
     <dependencies>
-        <!--引入接口依赖-->
-        <dependency>
-            <groupId>com.xer.igou</groupId>
-            <artifactId>product_interface</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
 
-        <!--公共模块接口依赖-->
+        <!--接口依赖-->
         <dependency>
             <groupId>com.xer.igou</groupId>
             <artifactId>common_interface</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-
-        <!--json操作支持-->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.46</version>
-        </dependency>
-
         <!--springboot支持-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -61,25 +47,39 @@
             <version>2.9.2</version>
         </dependency>
 
+        <!--redis-->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
         <!--配置中心支持包-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
 
-        <!--mybatis-plus 支持依赖包-->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>2.2.0</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>2.0.1.RELEASE</version>
         </dependency>
-        <!--数据库驱动-->
+        <!--hystrix-->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+            <version>2.0.1.RELEASE</version>
         </dependency>
-    </dependencies>
 
+        <!--velocity支持-->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
+
+    </dependencies>
     <!--打包插件-->
     <build>
         <plugins>

@@ -59,15 +59,12 @@ public class ProductController {
     @RequestMapping(value = "/batchRemove",method = RequestMethod.DELETE)
     public AjaxResult batchRemove(String ids) {
         try {
-//            String[] productIds = ids.split(",");
-//            Arrays.asList(productIds).forEach(id -> {
-//
-//                productService.deleteById(Long.parseLong(id));
-//            });
             List<Long> longs = StrUtils.splitStr2LongArr(ids);
-            longs.forEach(id -> {
-                productService.deleteById(id);
-            });
+            productService.deleteBatchIds(longs);
+//            longs.forEach(id -> {
+//                productService.deleteById(id);
+//
+//            });
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();

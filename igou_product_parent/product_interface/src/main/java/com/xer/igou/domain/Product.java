@@ -26,8 +26,8 @@ public class Product extends Model<Product> {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    private Date createTime;
-    private Date updateTime;
+    private Date createTime = new Date();
+    private Date updateTime = new Date();
     /**
      * 商品名称
      */
