@@ -17,6 +17,7 @@
         <result column="seoTitle" property="seoTitle" />
         <result column="seoKeywords" property="seoKeywords" />
         <result column="type_template_id" property="typeTemplateId" />
+        <result column="is_deleted" property="isDeleted" />
     </resultMap>
 
 </mapper>

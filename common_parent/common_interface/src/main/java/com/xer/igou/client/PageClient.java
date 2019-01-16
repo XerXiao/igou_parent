@@ -12,9 +12,9 @@ public interface PageClient {
 
     /**
      * 根据传入的特定数据和特定模板生成特定页面到特定位置
-     * @param model
-     * @param templateFile
-     * @param targetFile
+     * @param model 特定 数据
+     * @param templateFile 特定模板
+     * @param targetFile 特定位置的特定文件
      */
     @RequestMapping(value = "/staticIndexPage", method = RequestMethod.POST)
     void staticIndexPage(@RequestBody Map<String,Object> params);

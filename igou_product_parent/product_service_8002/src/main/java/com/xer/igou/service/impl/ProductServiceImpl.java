@@ -1,5 +1,6 @@
 package com.xer.igou.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
@@ -29,6 +30,7 @@ import java.util.List;
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements IProductService {
 
     public static final String KEY_IN_REDIS = "products_in_redis";
+    public static final String TOTAL_IN_REDIS = "total_in_redis";
     @Autowired
     private RedisClient redisClient;
 
@@ -40,30 +42,31 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
      * @param query
      * @return
      */
-    private static long total;
     @Override
     public PageList<Product> selectPageList(ProductQuery query) {
         List<Product> rows = null;
         Page<Product> page = null;
+        Long total = 0L;
 
         //高级查询从数据库获取值
-//        if(!"".equals(query.getKeyword()) && query.getKeyword() != null) {
+        if(!"".equals(query.getKeyword()) && query.getKeyword() != null) {
 //            System.out.println("高级查询获取");
-//            String allProducts_in_redis = redisClient.get(KEY_IN_REDIS);
-//            page = new Page<>(query.getPage(),query.getRows());
-//            rows = productMapper.getAllProducts(page, query);
-//            long total = page.getTotal();
-//            return new PageList<>(total,rows);
-//        }
+            page = new Page<>(0,query.getRows());
+            rows = productMapper.getAllProducts(page, query);
+            total = page.getTotal();
+            return new PageList<>(total,rows);
+        }
         //从缓存中获取
         String products_in_redis = redisClient.get(KEY_IN_REDIS+query.getPage());
         if(StringUtils.isNotBlank(products_in_redis)) {
             //如果有对应值
-            System.out.println("第"+query.getPage()+"页缓存获取");
+//            System.out.println("第"+query.getPage()+"页缓存获取");
             //转换为数组返回
             rows = JSONArray.parseArray(products_in_redis, Product.class);
+            //拿到对应总条数
+            total = Long.parseLong(redisClient.get(TOTAL_IN_REDIS));
         }else {
-            System.out.println("第"+query.getPage()+"页数据库获取");
+//            System.out.println("第"+query.getPage()+"页数据库获取");
             page = new Page<>(query.getPage(),query.getRows());
             //缓存中没有,到数据库中查询
             rows = productMapper.getAllProducts(page, query);
@@ -71,6 +74,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             //同步更新缓存
             String redisStr = JSONArray.toJSONString(rows);
             redisClient.set(KEY_IN_REDIS+query.getPage(),redisStr);
+            total = page.getTotal();
+            redisClient.set(TOTAL_IN_REDIS,total.toString());
         }
         return new PageList<>(total,rows);
     }
@@ -109,4 +114,5 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         redisClient.clear();
         return super.deleteBatchIds(idList);
     }
+
 }

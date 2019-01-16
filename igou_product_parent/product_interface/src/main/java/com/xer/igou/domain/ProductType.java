@@ -1,12 +1,17 @@
 package com.xer.igou.domain;
 
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,8 +29,10 @@ public class ProductType extends Model<ProductType> {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    private Long createTime;
-    private Long updateTime;
+    private Date createTime = new Date();
+    private Date updateTime = new Date();
+
+
 
     @TableField(exist = false)
     private List<ProductType> children;
@@ -36,7 +43,7 @@ public class ProductType extends Model<ProductType> {
     /**
      * 父ID
      */
-    private Long pid;
+    private Long pid = 0L;
     /**
      * 图标
      */
@@ -65,6 +72,20 @@ public class ProductType extends Model<ProductType> {
     @TableField("type_template_id")
     private Long typeTemplateId;
 
+    /**
+     * 逻辑删除字段
+     */
+    @TableField(value = "is_deleted")
+    @TableLogic
+    private Integer isDeleted = 0;
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
     public List<ProductType> getChildren() {
         return children;
     }
@@ -83,20 +104,20 @@ public class ProductType extends Model<ProductType> {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public Long getCreateTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
+    public Date getCreateTime() {
         return createTime;
     }
-
-    public void setCreateTime(Long createTime) {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
-
-    public Long getUpdateTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
+    public Date getUpdateTime() {
         return updateTime;
     }
-
-    public void setUpdateTime(Long updateTime) {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
 

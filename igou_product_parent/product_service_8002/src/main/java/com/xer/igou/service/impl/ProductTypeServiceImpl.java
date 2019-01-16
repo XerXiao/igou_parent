@@ -135,7 +135,7 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
         //读取配置文件获取配置信息
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream("sataticPage.properties"));
+            properties.load(this.getClass().getClassLoader().getResourceAsStream("staticPage.properties"));
             pageParams.put("model",list);
             pageParams.put("templateFile",properties.getProperty("staticPageTemplateFile"));
             pageParams.put("targetFile",properties.getProperty("staticPageTargetPath"));

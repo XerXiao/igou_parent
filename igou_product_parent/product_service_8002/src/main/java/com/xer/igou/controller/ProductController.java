@@ -56,15 +56,16 @@ public class ProductController {
         }
     }
 
+    /**
+     * 批量删除
+     * @param ids
+     * @return
+     */
     @RequestMapping(value = "/batchRemove",method = RequestMethod.DELETE)
     public AjaxResult batchRemove(String ids) {
         try {
             List<Long> longs = StrUtils.splitStr2LongArr(ids);
             productService.deleteBatchIds(longs);
-//            longs.forEach(id -> {
-//                productService.deleteById(id);
-//
-//            });
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();

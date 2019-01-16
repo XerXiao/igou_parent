@@ -14,6 +14,7 @@
         <result column="product_type_id" property="productTypeId" />
         <result column="sortIndex" property="sortIndex" />
         <result column="logo" property="logo" />
+        <result column="is_deleted" property="isDeleted" />
     </resultMap>
     <resultMap id="brandsMap" type="Brand">
         <id column="id" property="id"/>
@@ -26,10 +27,12 @@
         <result column="product_type_id" property="productTypeId" />
         <result column="sortIndex" property="sortIndex" />
         <result column="logo" property="logo" />
+        <result column="is_deleted" property="isDeleted" />
 
         <association property="productType" javaType="ProductType">
             <id column="pid" property="id"/>
             <result column="pname" property="name"/>
+            <result column="ppath" property="path"/>
         </association>
     </resultMap>
 
@@ -38,6 +41,7 @@
         SELECT
           b.*,
           p.id   pid,
+          p.path ppath,
           p.name pname
         FROM t_brand b LEFT JOIN t_product_type p ON b.product_type_id = p.id
         <include refid="whereSql"></include>

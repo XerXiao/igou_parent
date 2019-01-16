@@ -7,6 +7,7 @@ import com.xer.igou.query.BrandQuery;
 import com.xer.igou.util.AjaxResult;
 import com.xer.igou.util.PageList;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.xer.igou.util.StrUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +50,16 @@ public class BrandController {
     public AjaxResult delete(@PathVariable("id") Long id) {
         try {
             brandService.deleteById(id);
+            return AjaxResult.me();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.me().setMessage("删除对象失败！" + e.getMessage());
+        }
+    }
+    @RequestMapping(value = "/batchRemove", method = RequestMethod.DELETE)
+    public AjaxResult batchRemove(@RequestParam("ids") String ids) {
+        try {
+            brandService.deleteBatchIds(StrUtils.splitStr2LongArr(ids));
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();

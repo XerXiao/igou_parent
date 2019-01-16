@@ -1,5 +1,6 @@
 package com.xer.igou.domain;
 
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
@@ -85,6 +86,12 @@ public class Product extends Model<Product> {
      */
     private Integer minPrice;
     /**
+     * 逻辑删除字段
+     */
+    @TableField(value = "is_deleted")
+    @TableLogic
+    private Integer isDeleted = 0;
+    /**
      * 销量
      */
     private Integer saleCount;
@@ -108,6 +115,13 @@ public class Product extends Model<Product> {
     private Integer commonCommentCount;
     private Integer badCommentCount;
 
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 
     public Long getId() {
         return id;

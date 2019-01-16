@@ -22,7 +22,7 @@ public class ProductTypeController {
     * @param productType  传递的实体
     * @return Ajaxresult转换结果
     */
-    @RequestMapping(value="/add",method= RequestMethod.POST)
+    @RequestMapping(value="/save",method= RequestMethod.POST)
     public AjaxResult save(@RequestBody ProductType productType){
         try {
             if(productType.getId()!=null){

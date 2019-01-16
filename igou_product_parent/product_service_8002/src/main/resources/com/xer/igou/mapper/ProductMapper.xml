@@ -25,6 +25,7 @@
         <result column="goodCommentCount" property="goodCommentCount" />
         <result column="commonCommentCount" property="commonCommentCount" />
         <result column="badCommentCount" property="badCommentCount" />
+        <result column="is_deleted" property="isDeleted" />
     </resultMap>
 
 
@@ -75,6 +76,7 @@
         <result column="goodCommentCount" property="goodCommentCount" />
         <result column="commonCommentCount" property="commonCommentCount" />
         <result column="badCommentCount" property="badCommentCount" />
+        <result column="is_deleted" property="isDeleted" />
 
         <!--关联属性-->
         <association property="productType" javaType="ProductType">

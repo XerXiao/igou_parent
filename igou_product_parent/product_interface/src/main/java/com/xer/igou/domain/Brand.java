@@ -1,5 +1,6 @@
 package com.xer.igou.domain;
 
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
@@ -37,6 +38,12 @@ public class Brand extends Model<Brand> {
      */
     private String englishName;
     /**
+     * 逻辑删除字段
+     */
+    @TableField(value = "is_deleted")
+    @TableLogic
+    private Integer isDeleted = 0;
+    /**
      * 首字母
      */
     private String firstLetter;
@@ -57,6 +64,14 @@ public class Brand extends Model<Brand> {
      * 品牌LOGO
      */
     private String logo;
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 
     public ProductType getProductType() {
         return productType;
