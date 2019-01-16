@@ -37,12 +37,7 @@ public class Brand extends Model<Brand> {
      * 英文名
      */
     private String englishName;
-    /**
-     * 逻辑删除字段
-     */
-    @TableField(value = "is_deleted")
-    @TableLogic
-    private Integer isDeleted = 0;
+
     /**
      * 首字母
      */
@@ -64,6 +59,13 @@ public class Brand extends Model<Brand> {
      * 品牌LOGO
      */
     private String logo;
+
+    /**
+     * 逻辑删除字段
+     */
+    @TableField(value = "is_deleted")
+    @TableLogic
+    private Integer isDeleted = 0;
 
     public Integer getIsDeleted() {
         return isDeleted;

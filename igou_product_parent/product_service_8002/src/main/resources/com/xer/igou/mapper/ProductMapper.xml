@@ -47,6 +47,7 @@
             <if test="keyword != null and keyword != ''">
                 AND p.name LIKE CONCAT("%",#{keyword},"%")
             </if>
+            AND p.is_deleted = 0
         </where>
     </sql>
 

@@ -85,12 +85,7 @@ public class Product extends Model<Product> {
      * 最低价
      */
     private Integer minPrice;
-    /**
-     * 逻辑删除字段
-     */
-    @TableField(value = "is_deleted")
-    @TableLogic
-    private Integer isDeleted = 0;
+
     /**
      * 销量
      */
@@ -114,6 +109,12 @@ public class Product extends Model<Product> {
     private Integer goodCommentCount;
     private Integer commonCommentCount;
     private Integer badCommentCount;
+    /**
+     * 逻辑删除字段
+     */
+    @TableField(value = "is_deleted")
+    @TableLogic
+    private Integer isDeleted = 0;
 
     public Integer getIsDeleted() {
         return isDeleted;

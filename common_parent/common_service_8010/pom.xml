@@ -79,6 +79,13 @@
             <version>1.7</version>
         </dependency>
 
+        <!--fastdfs支持-->
+        <dependency>
+            <groupId>org.csource.fastdfs</groupId>
+            <artifactId>fastdfs</artifactId>
+            <version>1.2</version>
+        </dependency>
+
     </dependencies>
     <!--打包插件-->
     <build>
@@ -87,7 +94,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.xer.igou.ConfigServerApplication_8848</mainClass>
+                    <mainClass>com.xer.igou.CommonApplication_8010</mainClass>
                     <layout>ZIP</layout>
                 </configuration>
                 <executions>
