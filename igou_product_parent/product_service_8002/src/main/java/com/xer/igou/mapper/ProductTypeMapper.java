@@ -13,4 +13,9 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
  */
 public interface ProductTypeMapper extends BaseMapper<ProductType> {
 
+    /**
+     * 插入子节点
+     * @param productType
+     */
+    void insertChildren(ProductType productType);
 }

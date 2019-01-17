@@ -20,4 +20,10 @@ public interface IProductTypeService extends IService<ProductType> {
      * * @return
      */
     List<ProductType> getDataTree();
+
+    /**
+     * 添加子标签
+     * @param productType
+     */
+    void insertChild(ProductType productType);
 }

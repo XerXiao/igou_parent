@@ -87,7 +87,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.xer.igou.ConfigServerApplication_8848</mainClass>
+                    <mainClass>com.xer.igou.ProductServerApplication_8002</mainClass>
                     <layout>ZIP</layout>
                 </configuration>
                 <executions>

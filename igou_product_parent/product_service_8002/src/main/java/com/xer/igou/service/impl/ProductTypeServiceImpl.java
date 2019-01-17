@@ -1,5 +1,6 @@
 package com.xer.igou.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.xer.igou.client.PageClient;
@@ -14,10 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * <p>
@@ -56,6 +54,29 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
             result = loopGetProductTypes(productTypes);
         }
         return result;
+    }
+
+    @Override
+    public void insertChild(ProductType productType) {
+        try {
+
+            productTypeMapper.insertChildren(productType);
+            StringBuffer sb = new StringBuffer();
+            //获取到id，拼接path
+            //处理拼接path
+            String path = productType.getPath();
+            if(path == null) {
+                path = ".";
+            }
+            Long id = productType.getId();
+            //.pid.pid.id.
+            sb.append(path).append(id).append(".");
+            productType.setPath(sb.toString());
+            productTypeMapper.updateById(productType);
+            synchronizeOperate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private ArrayList<ProductType> loopGetProductTypes(List<ProductType> productTypes) {

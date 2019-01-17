@@ -4,20 +4,25 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.xer.igou.domain.ProductType">
-        <id column="id" property="id" />
-        <result column="createTime" property="createTime" />
-        <result column="updateTime" property="updateTime" />
-        <result column="name" property="name" />
-        <result column="pid" property="pid" />
-        <result column="logo" property="logo" />
-        <result column="description" property="description" />
-        <result column="sortIndex" property="sortIndex" />
-        <result column="path" property="path" />
-        <result column="totalCount" property="totalCount" />
-        <result column="seoTitle" property="seoTitle" />
-        <result column="seoKeywords" property="seoKeywords" />
-        <result column="type_template_id" property="typeTemplateId" />
-        <result column="is_deleted" property="isDeleted" />
+        <id column="id" property="id"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="name" property="name"/>
+        <result column="pid" property="pid"/>
+        <result column="logo" property="logo"/>
+        <result column="description" property="description"/>
+        <result column="sortIndex" property="sortIndex"/>
+        <result column="path" property="path"/>
+        <result column="totalCount" property="totalCount"/>
+        <result column="seoTitle" property="seoTitle"/>
+        <result column="seoKeywords" property="seoKeywords"/>
+        <result column="type_template_id" property="typeTemplateId"/>
+        <result column="is_deleted" property="isDeleted"/>
     </resultMap>
 
+    <!--void insertChildren(ProductType productType);-->
+    <insert id="insertChildren" parameterType="ProductType" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO t_product_type(createTime, updateTime, name, pid, logo, description, sortIndex, path, totalCount, seoTitle, seoKeywords, type_template_id, is_deleted)
+        VALUES (#{createTime},#{updateTime},#{name},#{pid},#{logo},#{description},#{sortIndex},#{path},#{totalCount},#{seoTitle},#{seoKeywords},#{typeTemplateId},#{isDeleted})
+    </insert>
 </mapper>
