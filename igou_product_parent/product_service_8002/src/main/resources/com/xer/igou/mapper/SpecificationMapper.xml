@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xer.igou.mapper.SpecificationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xer.igou.domain.Specification">
+        <id column="id" property="id"/>
+        <result column="specName" property="specName"/>
+    </resultMap>
+    <resultMap id="SpecificationMap" type="Specification">
+        <id column="id" property="id"/>
+        <result column="specName" property="specName"/>
+
+        <collection property="options"
+                    select="findOptions" ofType="SpecificationOption"
+                    column="id"
+                    javaType="list">
+        </collection>
+    </resultMap>
+
+
+    <!--List<Specification> getAllSpecifications(Page<Specification> page, SpecificationQuery query);-->
+
+    <select id="getAllSpecifications" parameterType="SpecificationQuery" resultMap="SpecificationMap">
+        SELECT
+        *
+        FROM t_specification
+        <include refid="whereSql"></include>
+    </select>
+    <sql id="whereSql">
+        <where>
+            <if test="id!=null and id != ''"></if>
+            <if test="keyword!=null and keyword!=''">
+                AND specName LIKE concat("%",#{keyword},"%")
+            </if>
+        </where>
+    </sql>
+
+    <select id="findOptions" parameterType="long" resultType="SpecificationOption">
+        SELECT * FROM t_specification_option WHERE spec_id = #{id} ORDER BY `index`
+    </select>
+</mapper>
+

@@ -25,4 +25,6 @@ public interface ProductMapper extends BaseMapper<Product> {
      */
     List<Product> getAllProducts(Page<Product> page, ProductQuery query);
 
+
+    void insertProcut(Product entity);
 }

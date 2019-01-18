@@ -103,9 +103,6 @@ public class ProductController {
 
         return productService.selectPageList(query);
 
-//        Page<Product> page = new Page<Product>(query.getPage(), query.getRows());
-//        page = productService.selectPage(page);
-//        return new PageList<Product>(page.getTotal(), page.getRecords());
     }
 
 }

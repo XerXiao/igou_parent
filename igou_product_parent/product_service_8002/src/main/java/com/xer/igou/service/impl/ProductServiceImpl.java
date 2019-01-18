@@ -2,10 +2,13 @@ package com.xer.igou.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.xer.igou.client.RedisClient;
 import com.xer.igou.domain.Product;
+import com.xer.igou.domain.ProductExt;
+import com.xer.igou.mapper.ProductExtMapper;
 import com.xer.igou.mapper.ProductMapper;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.service.IProductService;
@@ -15,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,6 +42,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private ProductExtMapper productExtMapper;
     /**
      * 使用缓存
      * @param query
@@ -89,30 +96,86 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Override
     public boolean insert(Product entity) {
         //执行操作后清空缓存
-        productMapper.insert(entity);
-        redisClient.clear();
-        return super.insert(entity);
+        try {
+            //先将产品信息保存
+            productMapper.insertProcut(entity);
+
+            //保存关联表信息
+            entity.getProductExt().setProductId(entity.getId());
+            productExtMapper.insert(entity.getProductExt());
+            redisClient.clear();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean deleteById(Serializable id) {
-        productMapper.deleteById(id);
-        redisClient.clear();
-        return super.deleteById(id);
+        try {
+            productMapper.deleteById(id);
+
+            //商品与商品扩展之间是一对一关系需要通过商品id查出对应的扩展信息进行修改
+            EntityWrapper<ProductExt> wrapper = new EntityWrapper<>();
+            wrapper.eq("productId",id);
+            List<ProductExt> productExts = productExtMapper.selectList(wrapper);
+            if (!productExts.isEmpty()) {
+                productExtMapper.deleteById(productExts.get(0).getId());
+            }
+            redisClient.clear();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean updateById(Product entity) {
-        productMapper.updateById(entity);
-        redisClient.clear();
-        return super.updateById(entity);
+        try {
+            entity.setUpdateTime(new Date());
+            productMapper.updateById(entity);
+
+            //商品与商品扩展之间是一对一关系需要通过商品id查出对应的扩展信息进行修改
+            EntityWrapper<ProductExt> wrapper = new EntityWrapper<>();
+            wrapper.eq("productId",entity.getId());
+            List<ProductExt> productExts = productExtMapper.selectList(wrapper);
+            if (!productExts.isEmpty()) {
+                ProductExt productExt = productExts.get(0);
+                productExt.setProductId(entity.getId());
+                entity.getProductExt().setId(productExt.getId());
+                productExtMapper.updateById(entity.getProductExt());
+            }
+            redisClient.clear();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean deleteBatchIds(Collection<? extends Serializable> idList) {
-        productMapper.deleteBatchIds(idList);
-        redisClient.clear();
-        return super.deleteBatchIds(idList);
+        try {
+            productMapper.deleteBatchIds(idList);
+
+            ArrayList<Long> longs = new ArrayList<>();
+            for (Serializable serializable : idList) {
+                EntityWrapper<ProductExt> wrapper = new EntityWrapper<>();
+                wrapper.eq("productId",serializable);
+                List<ProductExt> productExts = productExtMapper.selectList(wrapper);
+                if(!productExts.isEmpty()) {
+                    longs.add(productExts.get(0).getId());
+                }
+            }
+            productExtMapper.deleteBatchIds(longs);
+            redisClient.clear();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

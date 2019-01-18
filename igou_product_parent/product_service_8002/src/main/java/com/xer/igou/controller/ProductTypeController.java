@@ -7,6 +7,7 @@ import com.xer.igou.query.ProductTypeQuery;
 import com.xer.igou.util.AjaxResult;
 import com.xer.igou.util.PageList;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.xer.igou.util.StrUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +42,12 @@ public class ProductTypeController {
         }
     }
 
+    /**
+     *
+     * 批量添加子标签
+     * @param productType
+     * @return
+     */
     @RequestMapping(value = "/saveBatch", method = RequestMethod.POST)
     public AjaxResult saveBatch(@RequestBody ProductType[] productType) {
         try {
@@ -64,6 +71,23 @@ public class ProductTypeController {
     public AjaxResult delete(@PathVariable("id") Long id) {
         try {
             productTypeService.deleteById(id);
+            return AjaxResult.me();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.me().setMessage("删除对象失败！" + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量删除
+     * @param ids
+     * @return
+     */
+    @RequestMapping(value = "/deleteBatch",method = RequestMethod.DELETE)
+    public AjaxResult deleteBatch(@RequestParam(value = "ids") String ids){
+        try {
+            List<Long> longs = StrUtils.splitStr2LongArr(ids);
+            productTypeService.deleteBatchIds(longs);
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();

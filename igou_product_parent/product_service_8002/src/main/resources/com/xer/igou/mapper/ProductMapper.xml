@@ -37,9 +37,12 @@
           type.name pname,
           type.path path,
           brand.id    bid,
-          brand.name  bname
+          brand.name  bname,
+          pe.id peid,
+          pe.description peDescription,
+          pe.richContent peRichContent
         FROM t_product p LEFT JOIN t_product_type type ON p.product_type_id = type.id
-          INNER JOIN t_brand brand ON p.brand_id = brand.id
+          LEFT JOIN t_brand brand ON p.brand_id = brand.id LEFT JOIN t_product_ext pe ON pe.productId = p.id
           <include refid="whereSql"></include>
     </select>
     <sql id="whereSql">
@@ -89,8 +92,18 @@
             <id column="bid" property="id" />
             <result column="bname" property="name" />
         </association>
+        
+        <association property="productExt" javaType="ProductExt">
+            <id column="peid" property="id"/>
+            <result column="peDescription" property="description"/>
+            <result column="peRichContent" property="richContent"/>
+        </association>
     </resultMap>
 
 
-
+    <!--void insertProcut(Product entity);-->
+    <insert id="insertProcut" parameterType="Product" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO t_product(createTime, updateTime, name, subName, code, product_type_id, onSaleTime, offSaleTime, brand_id, state, maxPrice, minPrice, saleCount, viewCount, commentCount, commentScore, viewProperties, goodCommentCount, commonCommentCount, badCommentCount, is_deleted)
+        VALUES (#{createTime},#{updateTime},#{name},#{subName},#{code},#{productTypeId},#{onSaleTime},#{offSaleTime},#{brandId},#{state},#{maxPrice},#{minPrice},#{saleCount},#{viewCount},#{commentCount},#{commentScore},#{viewProperties},#{goodCommentCount},#{commonCommentCount},#{badCommentCount},#{isDeleted})
+    </insert>
 </mapper>

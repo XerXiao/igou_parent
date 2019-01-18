@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
+import sun.plugin2.main.client.PrintBandDescriptor;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -24,7 +25,6 @@ import java.util.Date;
 public class Product extends Model<Product> {
 
     private static final long serialVersionUID = 1L;
-
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     private Date createTime = new Date();
@@ -109,12 +109,27 @@ public class Product extends Model<Product> {
     private Integer goodCommentCount;
     private Integer commonCommentCount;
     private Integer badCommentCount;
+
+    /**
+     * 接收简介与详情信息，垂直分表
+     */
+    @TableField(exist = false)
+    private ProductExt productExt = new ProductExt();
+
     /**
      * 逻辑删除字段
      */
     @TableField(value = "is_deleted")
     @TableLogic
     private Integer isDeleted = 0;
+
+    public ProductExt getProductExt() {
+        return productExt;
+    }
+
+    public void setProductExt(ProductExt productExt) {
+        this.productExt = productExt;
+    }
 
     public Integer getIsDeleted() {
         return isDeleted;

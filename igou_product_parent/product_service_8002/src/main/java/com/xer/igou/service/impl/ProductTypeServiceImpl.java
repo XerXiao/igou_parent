@@ -92,10 +92,12 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
                 result.add(productType);
             } else {
                 ProductType p = map.get(productType.getPid());
-                if (p.getChildren() == null) {
-                    p.setChildren(new ArrayList<ProductType>());
+                if(p != null) {
+                    if ( p.getChildren() == null) {
+                        p.setChildren(new ArrayList<ProductType>());
+                    }
+                    p.getChildren().add(productType);
                 }
-                p.getChildren().add(productType);
             }
         }
         return result;
@@ -117,6 +119,18 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
     public boolean deleteById(Serializable id) {
         try {
             super.deleteById(id);
+            synchronizeOperate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteBatchIds(Collection<? extends Serializable> idList) {
+        try {
+            super.deleteBatchIds(idList);
             synchronizeOperate();
             return true;
         } catch (Exception e) {
