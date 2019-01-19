@@ -1,9 +1,7 @@
 package com.xer.igou.mapper;
 
-import com.baomidou.mybatisplus.plugins.Page;
 import com.xer.igou.domain.Specification;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.xer.igou.query.SpecificationQuery;
 
 import java.util.List;
 
@@ -13,9 +11,11 @@ import java.util.List;
  * </p>
  *
  * @author xer
- * @since 2019-01-18
+ * @since 2019-01-19
  */
 public interface SpecificationMapper extends BaseMapper<Specification> {
 
-    List<Specification> getAllSpecifications(Page<Specification> page, SpecificationQuery query);
+    List<Specification> selectViewListByTypeId(Long typeId);
+
+    List<Specification> selectSkuListByTypeId(Long typeId);
 }

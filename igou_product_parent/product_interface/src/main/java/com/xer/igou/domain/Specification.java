@@ -1,8 +1,9 @@
 package com.xer.igou.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import java.io.Serializable;
@@ -15,7 +16,7 @@ import java.util.List;
  * </p>
  *
  * @author xer
- * @since 2019-01-18
+ * @since 2019-01-19
  */
 @TableName("t_specification")
 public class Specification extends Model<Specification> {
@@ -27,36 +28,72 @@ public class Specification extends Model<Specification> {
     /**
      * 规格名称
      */
-    private String specName;
+    private String name;
+    private Integer isSku;
+    @TableField("product_type_id")
+    private Long productTypeId;
+    @TableLogic
+    @TableField("is_deleted")
+    private Integer isDeleted = 0;
 
     /**
-     * 属性选项
+     * 编辑属性时设置的值
      */
     @TableField(exist = false)
-    private List<SpecificationOption> options = new ArrayList<>();
+    private String selectValue;
 
-    public List<SpecificationOption> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<SpecificationOption> options) {
-        this.options = options;
-    }
+    /**
+     * 编辑sku属性时设置的值
+     */
+    @TableField(exist = false)
+    private List<String> skuValues = new ArrayList<>();
 
     public Long getId() {
         return id;
+    }
+
+    public String getSelectValue() {
+        return selectValue;
+    }
+
+    public void setSelectValue(String selectValue) {
+        this.selectValue = selectValue;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public String getSpecName() {
-        return specName;
+    public String getName() {
+        return name;
     }
 
-    public void setSpecName(String specName) {
-        this.specName = specName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getIsSku() {
+        return isSku;
+    }
+
+    public void setIsSku(Integer isSku) {
+        this.isSku = isSku;
+    }
+
+    public Long getProductTypeId() {
+        return productTypeId;
+    }
+
+    public void setProductTypeId(Long productTypeId) {
+        this.productTypeId = productTypeId;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
     @Override
@@ -64,11 +101,22 @@ public class Specification extends Model<Specification> {
         return this.id;
     }
 
+    public List<String> getSkuValues() {
+        return skuValues;
+    }
+
+    public void setSkuValues(List<String> skuValues) {
+        this.skuValues = skuValues;
+    }
+
     @Override
     public String toString() {
         return "Specification{" +
         ", id=" + id +
-        ", specName=" + specName +
+        ", name=" + name +
+        ", isSku=" + isSku +
+        ", productTypeId=" + productTypeId +
+        ", isDeleted=" + isDeleted +
         "}";
     }
 }

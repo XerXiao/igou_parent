@@ -2,8 +2,11 @@ package com.xer.igou.service;
 
 import com.xer.igou.domain.Product;
 import com.baomidou.mybatisplus.service.IService;
+import com.xer.igou.domain.Specification;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.util.PageList;
+
+import java.util.HashMap;
 
 /**
  * <p>
@@ -22,4 +25,7 @@ public interface IProductService extends IService<Product> {
      */
     PageList<Product> selectPageList(ProductQuery query);
 
+    void saveViewProperties(HashMap<String,Object> specifications);
+
+    void saveSkuProperties(HashMap<String, Object> specifications);
 }

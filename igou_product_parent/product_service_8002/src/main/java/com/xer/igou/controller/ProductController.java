@@ -2,6 +2,7 @@ package com.xer.igou.controller;
 
 import com.sun.org.apache.xpath.internal.SourceTree;
 import com.xer.igou.domain.Product;
+import com.xer.igou.domain.Specification;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.service.IProductService;
 import com.xer.igou.util.AjaxResult;
@@ -10,6 +11,7 @@ import com.xer.igou.util.StrUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -102,6 +104,29 @@ public class ProductController {
     public PageList<Product> json(@RequestBody ProductQuery query) {
 
         return productService.selectPageList(query);
+
+    }
+
+    @RequestMapping(value = "saveViewProperties",method = RequestMethod.POST)
+    public AjaxResult saveViewProperties(@RequestBody HashMap<String,Object> specifications) {
+        try {
+            productService.saveViewProperties(specifications);
+            return AjaxResult.me();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.me().setMessage("删除对象失败！" + e.getMessage());
+        }
+
+    }
+    @RequestMapping(value = "saveSkuProperties",method = RequestMethod.POST)
+    public AjaxResult saveSkuProperties(@RequestBody HashMap<String,Object> specifications) {
+        try {
+            productService.saveSkuProperties(specifications);
+            return AjaxResult.me();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.me().setMessage("删除对象失败！" + e.getMessage());
+        }
 
     }
 

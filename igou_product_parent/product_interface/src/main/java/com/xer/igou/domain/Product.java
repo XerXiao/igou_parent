@@ -63,6 +63,10 @@ public class Product extends Model<Product> {
     private Date offSaleTime;
 
     /**
+     * sku模板
+     */
+    private String skuTemplate;
+    /**
      * 商品品牌
      */
     @TableField("brand_id")
@@ -77,6 +81,11 @@ public class Product extends Model<Product> {
      * 状态
      */
     private Integer state;
+
+    /**
+     * 媒体数据
+     */
+    private String media;
     /**
      * 最高价
      */
@@ -166,6 +175,14 @@ public class Product extends Model<Product> {
 
     public String getName() {
         return name;
+    }
+
+    public String getSkuTemplate() {
+        return skuTemplate;
+    }
+
+    public void setSkuTemplate(String skuTemplate) {
+        this.skuTemplate = skuTemplate;
     }
 
     public void setName(String name) {
@@ -327,6 +344,15 @@ public class Product extends Model<Product> {
     @Override
     protected Serializable pkVal() {
         return this.id;
+    }
+
+
+    public String getMedia() {
+        return media;
+    }
+
+    public void setMedia(String media) {
+        this.media = media;
     }
 
     @Override

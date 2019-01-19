@@ -26,6 +26,7 @@
         <result column="commonCommentCount" property="commonCommentCount" />
         <result column="badCommentCount" property="badCommentCount" />
         <result column="is_deleted" property="isDeleted" />
+        <result column="skuTemplate" property="skuTemplate" />
     </resultMap>
 
 
@@ -81,6 +82,8 @@
         <result column="commonCommentCount" property="commonCommentCount" />
         <result column="badCommentCount" property="badCommentCount" />
         <result column="is_deleted" property="isDeleted" />
+        <result column="skuTemplate" property="skuTemplate" />
+
 
         <!--关联属性-->
         <association property="productType" javaType="ProductType">

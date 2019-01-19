@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.xer.igou.client.RedisClient;
 import com.xer.igou.domain.Product;
 import com.xer.igou.domain.ProductExt;
+import com.xer.igou.domain.Specification;
 import com.xer.igou.mapper.ProductExtMapper;
 import com.xer.igou.mapper.ProductMapper;
 import com.xer.igou.query.ProductQuery;
@@ -18,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -85,6 +83,33 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             redisClient.set(TOTAL_IN_REDIS,total.toString());
         }
         return new PageList<>(total,rows);
+    }
+
+    @Override
+    public void saveViewProperties(HashMap<String, Object> specifications) {
+        Integer productId = (Integer) specifications.get("productId");
+
+        List<Specification> properties = (List<Specification>) specifications.get("properties");
+
+        String pro = JSON.toJSONString(properties);
+
+        Product product = productMapper.selectById(productId);
+        product.setViewProperties(pro);
+
+        productMapper.updateById(product);
+
+    }
+
+    @Override
+    public void saveSkuProperties(HashMap<String, Object> specifications) {
+        Integer productId = (Integer) specifications.get("productId");
+
+        List<Specification> properties = (List<Specification>) specifications.get("properties");
+        String pro = JSON.toJSONString(properties);
+        Product product = productMapper.selectById(productId);
+        product.setSkuTemplate(pro);
+        //修改商品
+        productMapper.updateById(product);
     }
 
 

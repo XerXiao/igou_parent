@@ -4,40 +4,21 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.xer.igou.domain.Specification">
-        <id column="id" property="id"/>
-        <result column="specName" property="specName"/>
-    </resultMap>
-    <resultMap id="SpecificationMap" type="Specification">
-        <id column="id" property="id"/>
-        <result column="specName" property="specName"/>
-
-        <collection property="options"
-                    select="findOptions" ofType="SpecificationOption"
-                    column="id"
-                    javaType="list">
-        </collection>
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="isSku" property="isSku" />
+        <result column="product_type_id" property="productTypeId" />
+        <result column="is_deleted" property="isDeleted" />
     </resultMap>
 
 
-    <!--List<Specification> getAllSpecifications(Page<Specification> page, SpecificationQuery query);-->
-
-    <select id="getAllSpecifications" parameterType="SpecificationQuery" resultMap="SpecificationMap">
-        SELECT
-        *
-        FROM t_specification
-        <include refid="whereSql"></include>
+    <!--List<Specification> selectViewListByTypeId(Long typeId);-->
+    <select id="selectViewListByTypeId" parameterType="long" resultType="Specification">
+        select * from t_specification WHERE product_type_id = #{id} AND isSku = 0 AND is_deleted = 0
     </select>
-    <sql id="whereSql">
-        <where>
-            <if test="id!=null and id != ''"></if>
-            <if test="keyword!=null and keyword!=''">
-                AND specName LIKE concat("%",#{keyword},"%")
-            </if>
-        </where>
-    </sql>
 
-    <select id="findOptions" parameterType="long" resultType="SpecificationOption">
-        SELECT * FROM t_specification_option WHERE spec_id = #{id} ORDER BY `index`
+    <!--List<Specification> selectSkuListByTypeId(Long typeId);-->
+    <select id="selectSkuListByTypeId" parameterType="long" resultType="Specification">
+        select * from t_specification WHERE product_type_id = #{id} AND isSku = 1 AND is_deleted = 0
     </select>
 </mapper>
-
