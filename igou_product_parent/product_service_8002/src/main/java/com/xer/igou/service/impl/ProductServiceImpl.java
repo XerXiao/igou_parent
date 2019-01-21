@@ -5,16 +5,21 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.sun.org.apache.xerces.internal.xs.datatypes.ObjectList;
 import com.xer.igou.client.RedisClient;
 import com.xer.igou.domain.Product;
 import com.xer.igou.domain.ProductExt;
+import com.xer.igou.domain.Sku;
 import com.xer.igou.domain.Specification;
 import com.xer.igou.mapper.ProductExtMapper;
 import com.xer.igou.mapper.ProductMapper;
+import com.xer.igou.mapper.SkuMapper;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.service.IProductService;
 import com.xer.igou.util.PageList;
+import net.sf.jsqlparser.statement.select.ValuesList;
 import org.apache.commons.lang.StringUtils;
+import org.aspectj.weaver.ast.Instanceof;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +47,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Autowired
     private ProductExtMapper productExtMapper;
+
+    @Autowired
+    private SkuMapper skuMapper;
+
     /**
      * 使用缓存
+     *
      * @param query
      * @return
      */
@@ -54,35 +64,35 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         Long total = 0L;
 
         //高级查询从数据库获取值
-        if(!"".equals(query.getKeyword()) && query.getKeyword() != null) {
+        if (!"".equals(query.getKeyword()) && query.getKeyword() != null) {
 //            System.out.println("高级查询获取");
-            page = new Page<>(0,query.getRows());
+            page = new Page<>(0, query.getRows());
             rows = productMapper.getAllProducts(page, query);
             total = page.getTotal();
-            return new PageList<>(total,rows);
+            return new PageList<>(total, rows);
         }
         //从缓存中获取
-        String products_in_redis = redisClient.get(KEY_IN_REDIS+query.getPage());
-        if(StringUtils.isNotBlank(products_in_redis)) {
+        String products_in_redis = redisClient.get(KEY_IN_REDIS + query.getPage());
+        if (StringUtils.isNotBlank(products_in_redis)) {
             //如果有对应值
 //            System.out.println("第"+query.getPage()+"页缓存获取");
             //转换为数组返回
             rows = JSONArray.parseArray(products_in_redis, Product.class);
             //拿到对应总条数
             total = Long.parseLong(redisClient.get(TOTAL_IN_REDIS));
-        }else {
+        } else {
 //            System.out.println("第"+query.getPage()+"页数据库获取");
-            page = new Page<>(query.getPage(),query.getRows());
+            page = new Page<>(query.getPage(), query.getRows());
             //缓存中没有,到数据库中查询
             rows = productMapper.getAllProducts(page, query);
             total = page.getTotal();
             //同步更新缓存
             String redisStr = JSONArray.toJSONString(rows);
-            redisClient.set(KEY_IN_REDIS+query.getPage(),redisStr);
+            redisClient.set(KEY_IN_REDIS + query.getPage(), redisStr);
             total = page.getTotal();
-            redisClient.set(TOTAL_IN_REDIS,total.toString());
+            redisClient.set(TOTAL_IN_REDIS, total.toString());
         }
-        return new PageList<>(total,rows);
+        return new PageList<>(total, rows);
     }
 
     @Override
@@ -104,17 +114,75 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public void saveSkuProperties(HashMap<String, Object> specifications) {
         Integer productId = (Integer) specifications.get("productId");
 
-        List<Specification> properties = (List<Specification>) specifications.get("properties");
-        String pro = JSON.toJSONString(properties);
+        List<Specification> skuProperties = (List<Specification>) specifications.get("skuProperties");
+        List<Map<String, Object>> skus = (List<Map<String, Object>>) specifications.get("skuPro");
+        String pro = JSON.toJSONString(skuProperties);
+
         Product product = productMapper.selectById(productId);
         product.setSkuTemplate(pro);
-        //修改商品
+//        修改商品
         productMapper.updateById(product);
+
+        for (Map<String, Object> sku : skus) {
+            Set<String> keys = sku.keySet();
+            StringBuffer stringBuffer = new StringBuffer();
+            Sku skuObj = new Sku();
+            skuObj.setProductId(productId.longValue());
+            StringBuffer idSb = new StringBuffer();
+
+            keys.forEach(key -> {
+                switch (key) {
+                    case "price":
+                        skuObj.setPrice(Integer.valueOf((String) sku.get(key)));
+                        break;
+                    case "availableStock":
+                        skuObj.setAvailableStock(Integer.valueOf((String) sku.get(key)));
+                        break;
+                    case "state":
+                        if ((Integer) sku.get(key) == 0) {
+                            skuObj.setState(true);
+                        } else {
+                            skuObj.setState(false);
+                        }
+                        break;
+                    default:
+
+                        String[] split = key.split(":");
+                        //对应属性id
+                        Long id = Long.parseLong(split[0]);
+                        //值
+                        String value = (String) sku.get(key);
+
+                        //获取每个属性对应值的id
+                        int valuesId = getValuesId(id, value, skuProperties);
+                        idSb.append(valuesId).append("_");
+                        stringBuffer.append(key + ":").append(value + "_");
+                }
+            });
+            skuObj.setSkuVlaues(stringBuffer.toString().substring(0, stringBuffer.toString().lastIndexOf("_")));
+            //保存数据到sku表
+            skuObj.setIndex(idSb.toString().substring(0, idSb.toString().lastIndexOf("_")));
+            skuMapper.insert(skuObj);
+        }
+
+    }
+
+    private int getValuesId(Long id, String value, List<Specification> skuProperties) {
+        String s = JSON.toJSONString(skuProperties);
+        List<Specification> specifications = JSON.parseArray(s, Specification.class);
+        for (Specification skuProperty : specifications) {
+            if (id.equals(skuProperty.getId())) {
+                //拿到skuValus数组
+                List<String> valuse = skuProperty.getSkuValues();
+                //拿到对应值所在的下标
+                return valuse.indexOf(value);
+            }
+        }
+        return -1;
     }
 
 
     /**
-     *
      * 覆写修改 增删改操作
      */
 
@@ -143,7 +211,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
             //商品与商品扩展之间是一对一关系需要通过商品id查出对应的扩展信息进行修改
             EntityWrapper<ProductExt> wrapper = new EntityWrapper<>();
-            wrapper.eq("productId",id);
+            wrapper.eq("productId", id);
             List<ProductExt> productExts = productExtMapper.selectList(wrapper);
             if (!productExts.isEmpty()) {
                 productExtMapper.deleteById(productExts.get(0).getId());
@@ -164,7 +232,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
             //商品与商品扩展之间是一对一关系需要通过商品id查出对应的扩展信息进行修改
             EntityWrapper<ProductExt> wrapper = new EntityWrapper<>();
-            wrapper.eq("productId",entity.getId());
+            wrapper.eq("productId", entity.getId());
             List<ProductExt> productExts = productExtMapper.selectList(wrapper);
             if (!productExts.isEmpty()) {
                 ProductExt productExt = productExts.get(0);
@@ -188,9 +256,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             ArrayList<Long> longs = new ArrayList<>();
             for (Serializable serializable : idList) {
                 EntityWrapper<ProductExt> wrapper = new EntityWrapper<>();
-                wrapper.eq("productId",serializable);
+                wrapper.eq("productId", serializable);
                 List<ProductExt> productExts = productExtMapper.selectList(wrapper);
-                if(!productExts.isEmpty()) {
+                if (!productExts.isEmpty()) {
                     longs.add(productExts.get(0).getId());
                 }
             }

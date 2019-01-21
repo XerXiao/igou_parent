@@ -10,6 +10,7 @@ import com.xer.igou.query.SpecificationQuery;
 import com.xer.igou.util.AjaxResult;
 import com.xer.igou.util.PageList;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.xer.igou.util.StrUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -47,13 +48,13 @@ public class SpecificationController {
 
     /**
     * 删除对象信息
-    * @param id
     * @return
     */
-    @RequestMapping(value="/delete/{id}",method=RequestMethod.DELETE)
-    public AjaxResult delete(@PathVariable("id") Long id){
+    @RequestMapping(value="/delete",method=RequestMethod.DELETE)
+    public AjaxResult delete(@RequestParam(value = "ids") String ids){
         try {
-            specificationService.deleteById(id);
+
+            specificationService.deleteBatchIds(StrUtils.splitStr2LongArr(ids));
             return AjaxResult.me();
         } catch (Exception e) {
         e.printStackTrace();
@@ -129,7 +130,7 @@ public class SpecificationController {
         Product product = productService.selectById(productId);
         String skuTemplate = product.getSkuTemplate();
         if(StringUtils.isNotBlank(skuTemplate)) {
-            //已经设置了显示属性,回显
+            //已经设置了显示属性,回显属性配置信息
             return JSON.parseArray(skuTemplate,Specification.class);
         }else {
 //            System.out.println("查询 "+product.getProductTypeId());

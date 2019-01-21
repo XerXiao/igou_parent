@@ -114,18 +114,18 @@ public class ProductController {
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();
-            return AjaxResult.me().setMessage("删除对象失败！" + e.getMessage());
+            return AjaxResult.me().setMessage("保存对象失败！" + e.getMessage());
         }
 
     }
     @RequestMapping(value = "saveSkuProperties",method = RequestMethod.POST)
-    public AjaxResult saveSkuProperties(@RequestBody HashMap<String,Object> specifications) {
+    public AjaxResult saveSkuProperties(@RequestBody HashMap<String,Object> skus) {
         try {
-            productService.saveSkuProperties(specifications);
+            productService.saveSkuProperties(skus);
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();
-            return AjaxResult.me().setMessage("删除对象失败！" + e.getMessage());
+            return AjaxResult.me().setMessage("保存对象失败！" + e.getMessage());
         }
 
     }
