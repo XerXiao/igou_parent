@@ -2,3 +2,8 @@
 *.iml
 target
 /*.iml
+/basic_parent/*.iml
+/eureka_server_7001/*.iml
+/plat_parent/*.iml
+/plat_parent/plat_interface/*.iml
+/zuul_gateway_9527/*.iml
