@@ -130,4 +130,15 @@ public class ProductController {
 
     }
 
+
+    @RequestMapping(value = "onSaleOrOff",method = RequestMethod.POST)
+    public AjaxResult onSaleOrOff(@RequestBody HashMap<String,Object> params) {
+        try {
+            productService.onSaleOrOffSale(params);
+            return AjaxResult.me();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.me().setMessage("上下架操作失败！" + e.getMessage());
+        }
+    }
 }

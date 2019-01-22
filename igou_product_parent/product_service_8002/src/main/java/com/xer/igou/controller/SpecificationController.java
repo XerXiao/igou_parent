@@ -32,13 +32,15 @@ public class SpecificationController {
     * @return Ajaxresult转换结果
     */
     @RequestMapping(value="/save",method= RequestMethod.POST)
-    public AjaxResult save(@RequestBody Specification specification){
+    public AjaxResult save(@RequestBody List<Specification> specification){
         try {
-            if(specification.getId()!=null){
-                specificationService.updateById(specification);
-            }else{
-                specificationService.insert(specification);
-            }
+            specification.forEach(spec -> {
+                if(spec.getId()!=null){
+                    specificationService.updateById(spec);
+                }else{
+                    specificationService.insert(spec);
+                }
+            });
             return AjaxResult.me();
         } catch (Exception e) {
             e.printStackTrace();

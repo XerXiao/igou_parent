@@ -1,19 +1,21 @@
 package com.xer.igou.service.impl;
 
+import com.google.common.collect.Lists;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.sun.org.apache.xerces.internal.xs.datatypes.ObjectList;
+import com.xer.igou.client.ProductDoc;
+import com.xer.igou.client.ProductDocClient;
 import com.xer.igou.client.RedisClient;
-import com.xer.igou.domain.Product;
-import com.xer.igou.domain.ProductExt;
-import com.xer.igou.domain.Sku;
-import com.xer.igou.domain.Specification;
-import com.xer.igou.mapper.ProductExtMapper;
-import com.xer.igou.mapper.ProductMapper;
-import com.xer.igou.mapper.SkuMapper;
+import com.xer.igou.domain.*;
+import com.xer.igou.mapper.*;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.service.IProductService;
 import com.xer.igou.util.PageList;
@@ -50,6 +52,15 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Autowired
     private SkuMapper skuMapper;
+
+    @Autowired
+    private ProductDocClient productDocClient;
+
+    @Autowired
+    private ProductTypeMapper productTypeMapper;
+
+    @Autowired
+    private BrandMapper brandMapper;
 
     /**
      * 使用缓存
@@ -133,7 +144,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             keys.forEach(key -> {
                 switch (key) {
                     case "price":
-                        skuObj.setPrice(Integer.valueOf((String) sku.get(key)));
+                        skuObj.setPrice(Integer.valueOf((String) sku.get(key))*100);
                         break;
                     case "availableStock":
                         skuObj.setAvailableStock(Integer.valueOf((String) sku.get(key)));
@@ -167,6 +178,60 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     }
 
+    @Override
+    public void onSaleOrOffSale(HashMap<String, Object> params) {
+        Integer onSale = (Integer) params.get("onSale");
+
+        String ids = (String) params.get("ids");
+        String[] productIds = ids.split(",");
+        Long[] LongIds = new Long[productIds.length];
+        for (int i = 0; i < productIds.length; i++) {
+            LongIds[i] = Long.parseLong(productIds[i]);
+        }
+        List<Long> longs = Arrays.asList(LongIds);
+
+        //保存修改数据库
+        if(onSale == 1) {
+            //下架操作
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("offSaleTime",new Date());
+            map.put("ids",longs);
+            productMapper.offSale(map);
+
+            List<ProductDoc> productDocs = new ArrayList<>();
+            for (Long aLong : longs) {
+                Product product = productMapper.selectById(aLong);
+                if(product != null) {
+                    productDocs.add(product2ProductDocList(product));
+                }
+            }
+            productDocClient.delBatch(productDocs);
+            redisClient.clear();
+        }else {
+            //上架操作
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("onSaleTime",new Date());
+            map.put("ids",longs);
+            productMapper.onSale(map);
+            List<ProductDoc> productDocs = new ArrayList<>();
+            for (Long aLong : longs) {
+                Product product = productMapper.selectById(aLong);
+                if(product != null) {
+                   productDocs.add(product2ProductDocList(product));
+                }
+            }
+            //插入es库
+            productDocClient.addBatch(productDocs);
+            redisClient.clear();
+        }
+
+
+    }
+
+    private ProductDoc product2ProductDocList(Product product) {
+        return product2productDoc(product);
+    }
+
     private int getValuesId(Long id, String value, List<Specification> skuProperties) {
         String s = JSON.toJSONString(skuProperties);
         List<Specification> specifications = JSON.parseArray(s, Specification.class);
@@ -193,6 +258,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             //先将产品信息保存
             productMapper.insertProcut(entity);
 
+            //插入es库
+            productDocClient.add(product2productDoc(entity));
             //保存关联表信息
             entity.getProductExt().setProductId(entity.getId());
             productExtMapper.insert(entity.getProductExt());
@@ -216,6 +283,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             if (!productExts.isEmpty()) {
                 productExtMapper.deleteById(productExts.get(0).getId());
             }
+
+            //如果商品为上架状态，需要同步删除es库
+            Product product = productMapper.selectById(id);
+            if (product.getState() == 1) {
+                productDocClient.del(product.getId());
+            }
+
             redisClient.clear();
             return true;
         } catch (Exception e) {
@@ -240,12 +314,66 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 entity.getProductExt().setId(productExt.getId());
                 productExtMapper.updateById(entity.getProductExt());
             }
+            //如果商品为上架状态，要同步修改es
+            if (entity.getState() == 1) {
+                ProductDoc productDoc = product2productDoc(entity);
+                productDocClient.add(productDoc);
+            }
             redisClient.clear();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 商品转换为索引库商品对象
+     *
+     * @param entity
+     * @return
+     */
+    private ProductDoc product2productDoc(Product entity) {
+
+        ProductDoc productDoc = new ProductDoc();
+        productDoc.setId(entity.getId());
+        productDoc.setProductTypeId(entity.getProductTypeId());
+        productDoc.setBrandId(entity.getBrandId());
+        productDoc.setOnsaleTime(new Date());
+        productDoc.setSaleCount(0);
+        productDoc.setViewCount(0);
+        productDoc.setCommentCount(0);
+
+        ProductType productType = productTypeMapper.selectById(entity.getProductTypeId());
+        Brand brand = brandMapper.selectById(entity.getBrandId());
+
+        productDoc.setAll(entity.getName() + " " + entity.getSubName() + " " + productType.getName() + " " + brand.getName());
+        productDoc.setViewProperties(entity.getViewProperties());
+        productDoc.setSkuProperties(entity.getSkuTemplate());
+        String media = entity.getMedia();
+        List<String> medias = null;
+        if (StringUtils.isNotBlank(media)) {
+            String[] split = media.split(",");
+            medias = Arrays.asList(split);
+        }
+        productDoc.setMedias(medias);
+
+        //获取sku遍历得到所有价格获取最大最小值
+        List<Sku> skus = skuMapper.selectList(new EntityWrapper<Sku>().eq("productId", entity.getId()));
+        Integer min = 999999999;
+        Integer max = 0;
+        for (Sku sku : skus) {
+            if(sku.getPrice() < min) {
+                min = sku.getPrice();
+            }
+            if (sku.getPrice() > max) {
+                max = sku.getPrice();
+            }
+        }
+        productDoc.setMaxPrice(max);
+        productDoc.setMinPrice(min);
+
+        return productDoc;
     }
 
     @Override
@@ -263,6 +391,25 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 }
             }
             productExtMapper.deleteBatchIds(longs);
+
+            //如果商品为上架状态要同步删除es库中的数据
+//            List<Long> ids = new ArrayList<>();
+//            idList.forEach(id-> {
+//                Product product = productMapper.selectById(id);
+//                if(product != null) {
+//                    if(product.getState() == 1) {
+//                        ids.add(product.getId());
+//                    }
+//                }
+//            });
+            List<ProductDoc> productDocs = new ArrayList<>();
+            for (Long aLong : longs) {
+                Product product = productMapper.selectById(aLong);
+                if(product != null) {
+                    productDocs.add(product2ProductDocList(product));
+                }
+            }
+            productDocClient.delBatch(productDocs);
             redisClient.clear();
             return true;
         } catch (Exception e) {

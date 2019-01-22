@@ -28,4 +28,10 @@ public interface IProductService extends IService<Product> {
     void saveViewProperties(HashMap<String,Object> specifications);
 
     void saveSkuProperties(HashMap<String, Object> specifications);
+
+    /**
+     * 商品上下架操作
+     * @param params
+     */
+    void onSaleOrOffSale(HashMap<String, Object> params);
 }

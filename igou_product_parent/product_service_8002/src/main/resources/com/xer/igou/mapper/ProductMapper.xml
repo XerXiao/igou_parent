@@ -4,47 +4,48 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.xer.igou.domain.Product">
-        <id column="id" property="id" />
-        <result column="createTime" property="createTime" />
-        <result column="updateTime" property="updateTime" />
-        <result column="name" property="name" />
-        <result column="subName" property="subName" />
-        <result column="code" property="code" />
-        <result column="product_type_id" property="productTypeId" />
-        <result column="onSaleTime" property="onSaleTime" />
-        <result column="offSaleTime" property="offSaleTime" />
-        <result column="brand_id" property="brandId" />
-        <result column="state" property="state" />
-        <result column="maxPrice" property="maxPrice" />
-        <result column="minPrice" property="minPrice" />
-        <result column="saleCount" property="saleCount" />
-        <result column="viewCount" property="viewCount" />
-        <result column="commentCount" property="commentCount" />
-        <result column="commentScore" property="commentScore" />
-        <result column="viewProperties" property="viewProperties" />
-        <result column="goodCommentCount" property="goodCommentCount" />
-        <result column="commonCommentCount" property="commonCommentCount" />
-        <result column="badCommentCount" property="badCommentCount" />
-        <result column="is_deleted" property="isDeleted" />
-        <result column="skuTemplate" property="skuTemplate" />
+        <id column="id" property="id"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="name" property="name"/>
+        <result column="subName" property="subName"/>
+        <result column="code" property="code"/>
+        <result column="product_type_id" property="productTypeId"/>
+        <result column="onSaleTime" property="onSaleTime"/>
+        <result column="offSaleTime" property="offSaleTime"/>
+        <result column="brand_id" property="brandId"/>
+        <result column="state" property="state"/>
+        <result column="maxPrice" property="maxPrice"/>
+        <result column="minPrice" property="minPrice"/>
+        <result column="saleCount" property="saleCount"/>
+        <result column="viewCount" property="viewCount"/>
+        <result column="commentCount" property="commentCount"/>
+        <result column="commentScore" property="commentScore"/>
+        <result column="viewProperties" property="viewProperties"/>
+        <result column="goodCommentCount" property="goodCommentCount"/>
+        <result column="commonCommentCount" property="commonCommentCount"/>
+        <result column="badCommentCount" property="badCommentCount"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="skuTemplate" property="skuTemplate"/>
+
     </resultMap>
 
 
     <!--List<Product> getAllProducts(Page<Product> page, ProductQuery query);-->
     <select id="getAllProducts" parameterType="ProductQuery" resultMap="productMap">
         SELECT
-          p.*,
-          type.id   pid,
-          type.name pname,
-          type.path path,
-          brand.id    bid,
-          brand.name  bname,
-          pe.id peid,
-          pe.description peDescription,
-          pe.richContent peRichContent
+        p.*,
+        type.id pid,
+        type.name pname,
+        type.path path,
+        brand.id bid,
+        brand.name bname,
+        pe.id peid,
+        pe.description peDescription,
+        pe.richContent peRichContent
         FROM t_product p LEFT JOIN t_product_type type ON p.product_type_id = type.id
-          LEFT JOIN t_brand brand ON p.brand_id = brand.id LEFT JOIN t_product_ext pe ON pe.productId = p.id
-          <include refid="whereSql"></include>
+        LEFT JOIN t_brand brand ON p.brand_id = brand.id LEFT JOIN t_product_ext pe ON pe.productId = p.id
+        <include refid="whereSql"></include>
     </select>
     <sql id="whereSql">
         <where>
@@ -56,46 +57,44 @@
     </sql>
 
 
-
-
     <resultMap id="productMap" type="Product">
         <!--基础属性-->
-        <id column="id" property="id" />
-        <result column="createTime" property="createTime" />
-        <result column="updateTime" property="updateTime" />
-        <result column="name" property="name" />
-        <result column="subName" property="subName" />
-        <result column="code" property="code" />
-        <result column="product_type_id" property="productTypeId" />
-        <result column="onSaleTime" property="onSaleTime" />
-        <result column="offSaleTime" property="offSaleTime" />
-        <result column="brand_id" property="brandId" />
-        <result column="state" property="state" />
-        <result column="maxPrice" property="maxPrice" />
-        <result column="minPrice" property="minPrice" />
-        <result column="saleCount" property="saleCount" />
-        <result column="viewCount" property="viewCount" />
-        <result column="commentCount" property="commentCount" />
-        <result column="commentScore" property="commentScore" />
-        <result column="viewProperties" property="viewProperties" />
-        <result column="goodCommentCount" property="goodCommentCount" />
-        <result column="commonCommentCount" property="commonCommentCount" />
-        <result column="badCommentCount" property="badCommentCount" />
-        <result column="is_deleted" property="isDeleted" />
-        <result column="skuTemplate" property="skuTemplate" />
+        <id column="id" property="id"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="name" property="name"/>
+        <result column="subName" property="subName"/>
+        <result column="code" property="code"/>
+        <result column="product_type_id" property="productTypeId"/>
+        <result column="onSaleTime" property="onSaleTime"/>
+        <result column="offSaleTime" property="offSaleTime"/>
+        <result column="brand_id" property="brandId"/>
+        <result column="state" property="state"/>
+        <result column="maxPrice" property="maxPrice"/>
+        <result column="minPrice" property="minPrice"/>
+        <result column="saleCount" property="saleCount"/>
+        <result column="viewCount" property="viewCount"/>
+        <result column="commentCount" property="commentCount"/>
+        <result column="commentScore" property="commentScore"/>
+        <result column="viewProperties" property="viewProperties"/>
+        <result column="goodCommentCount" property="goodCommentCount"/>
+        <result column="commonCommentCount" property="commonCommentCount"/>
+        <result column="badCommentCount" property="badCommentCount"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="skuTemplate" property="skuTemplate"/>
 
 
         <!--关联属性-->
         <association property="productType" javaType="ProductType">
-            <id column="pid" property="id" />
-            <result column="pname" property="name" />
+            <id column="pid" property="id"/>
+            <result column="pname" property="name"/>
             <result column="path" property="path"/>
         </association>
         <association property="brand" javaType="Brand">
-            <id column="bid" property="id" />
-            <result column="bname" property="name" />
+            <id column="bid" property="id"/>
+            <result column="bname" property="name"/>
         </association>
-        
+
         <association property="productExt" javaType="ProductExt">
             <id column="peid" property="id"/>
             <result column="peDescription" property="description"/>
@@ -109,4 +108,21 @@
         INSERT INTO t_product(createTime, updateTime, name, subName, code, product_type_id, onSaleTime, offSaleTime, brand_id, state, maxPrice, minPrice, saleCount, viewCount, commentCount, commentScore, viewProperties, goodCommentCount, commonCommentCount, badCommentCount, is_deleted)
         VALUES (#{createTime},#{updateTime},#{name},#{subName},#{code},#{productTypeId},#{onSaleTime},#{offSaleTime},#{brandId},#{state},#{maxPrice},#{minPrice},#{saleCount},#{viewCount},#{commentCount},#{commentScore},#{viewProperties},#{goodCommentCount},#{commonCommentCount},#{badCommentCount},#{isDeleted})
     </insert>
+
+
+    <!--void offSale(HashMap<String, Object> params);-->
+    <update id="offSale" parameterType="map">
+        UPDATE t_product SET state = 0,offSaleTime = #{offSaleTime} WHERE id in
+        <foreach collection="ids" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+
+    <!--void onSale(HashMap<String, Object> params);-->
+    <update id="onSale" parameterType="map">
+        UPDATE t_product SET state = 1,onSaleTime = #{onSaleTime} WHERE id in
+        <foreach collection="ids" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
 </mapper>

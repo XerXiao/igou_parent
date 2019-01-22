@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.xer.igou.domain.Product;
 import com.xer.igou.query.ProductQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -27,4 +28,15 @@ public interface ProductMapper extends BaseMapper<Product> {
 
 
     void insertProcut(Product entity);
+
+    /**
+     * 商品下架
+     */
+    void offSale(HashMap<String, Object> params);
+
+    /**
+     * 商品下架
+     *
+     */
+    void onSale(HashMap<String, Object> params);
 }
