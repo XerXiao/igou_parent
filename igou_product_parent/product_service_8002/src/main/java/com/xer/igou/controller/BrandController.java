@@ -5,12 +5,14 @@ import com.xer.igou.service.IBrandService;
 import com.xer.igou.domain.Brand;
 import com.xer.igou.query.BrandQuery;
 import com.xer.igou.util.AjaxResult;
+import com.xer.igou.util.LetterUtil;
 import com.xer.igou.util.PageList;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.xer.igou.util.StrUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -28,9 +30,13 @@ public class BrandController {
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody Brand brand) {
         try {
+            //设置首字母
+            brand.setFirstLetter(LetterUtil.getFirstLetter(brand.getName()));
             if (brand.getId() != null) {
+                brand.setUpdateTime(new Date());
                 brandService.updateById(brand);
             } else {
+                brand.setCreateTime(new Date());
                 brandService.insert(brand);
             }
             return AjaxResult.me();
@@ -106,4 +112,6 @@ public class BrandController {
     public List<Brand> brands() {
         return brandService.getDataTree();
     }
+
+
 }

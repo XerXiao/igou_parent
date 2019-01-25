@@ -1,6 +1,7 @@
 package com.xer.igou.controller;
 
 import com.sun.org.apache.xpath.internal.SourceTree;
+import com.xer.igou.client.ProductDocClient;
 import com.xer.igou.domain.Product;
 import com.xer.igou.domain.Specification;
 import com.xer.igou.query.ProductQuery;
@@ -13,12 +14,29 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/product")
 public class ProductController {
     @Autowired
     public IProductService productService;
+
+
+    @Autowired
+    private ProductDocClient productDocClient;
+    /**
+     * 前台主页查询过滤
+     * @param query
+     * @return
+     */
+    @RequestMapping(value = "/search", method = RequestMethod.POST)
+    public PageList<Map<String,Object>> search(@RequestBody Map<String,Object> query) {
+        //keyword productTypeId brandId price sortField sortType page rows maxPrice minPrice
+        //从ES中查询获取数据
+        return productDocClient.search(query);
+    }
+
 
     /**
      * 保存和修改公用的
@@ -141,4 +159,7 @@ public class ProductController {
             return AjaxResult.me().setMessage("上下架操作失败！" + e.getMessage());
         }
     }
+
+
+
 }

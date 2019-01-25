@@ -2,10 +2,14 @@ package com.xer.igou.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.xer.igou.client.PageClient;
 import com.xer.igou.client.RedisClient;
+import com.xer.igou.domain.Brand;
+import com.xer.igou.domain.Product;
 import com.xer.igou.domain.ProductType;
+import com.xer.igou.mapper.BrandMapper;
 import com.xer.igou.mapper.ProductTypeMapper;
 import com.xer.igou.service.IProductTypeService;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +40,76 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
     private PageClient pageClient;
     @Autowired
     private ProductTypeMapper productTypeMapper;
+
+    @Autowired
+    private BrandMapper brandMapper;
+
+
+
+    @Override
+    public List<Brand> getBrands(Long productTypeId) {
+        return brandMapper.selectList(new EntityWrapper<Brand>().eq("product_type_id",productTypeId));
+    }
+
+    @Override
+    public Set<String> getBrandsFirstLetters(Long productTypeId) {
+        List<Brand> list = brandMapper.selectList(new EntityWrapper<Brand>().eq("product_type_id", productTypeId));
+        Set<String> letters = new TreeSet<>();
+        list.forEach(brand -> {
+            letters.add(brand.getFirstLetter());
+        });
+        return letters;
+    }
+
+
+    @Override
+    public List<Map<String,Object>> getCrumbles(Long productTypeId) {
+
+        //获取商品类别信息
+        ProductType productType = productTypeMapper.selectById(productTypeId);
+        //获取到path
+        String path = productType.getPath();
+        //分解path获取到其他同级以及父类信息
+        path = path.substring(1, path.length() - 1);
+        String[] split = path.split("\\.");
+        Long[] longs = new Long[split.length];
+        if(split.length != 0) {
+            for (int i = 0; i < split.length; i++) {
+                longs[i] = Long.parseLong(split[i]);
+            }
+        }
+        List<Long> ids = Arrays.asList(longs);
+
+        ArrayList< Map<String, Object>> list = new ArrayList<>();
+        for (Long id : ids) {
+            Map<String,Object> node = new HashMap<>();
+            //获取每一个节点信息
+            //先获取自己
+            ProductType self = productTypeMapper.selectById(id);
+            node.put("productTypeSelf",self);
+            //获取兄弟节点
+            Long pid = self.getPid();
+            List<ProductType> brothers =
+                    productTypeMapper.selectList(new EntityWrapper<ProductType>()
+                            .eq("pid", pid));
+            //去掉自己
+            Iterator<ProductType> iterator = brothers.iterator();
+            while (iterator.hasNext()) {
+                ProductType me = iterator.next();
+                if(me.getId().equals(self.getId())) {
+                    iterator.remove();
+                    break;
+                }
+            }
+            //放入兄弟节点
+            node.put("productTypeBrothers",brothers);
+            list.add(node);
+        }
+        return list;
+    }
+
+
+
 
     @Override
     public List<ProductType> getDataTree() {
@@ -78,6 +152,8 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
             e.printStackTrace();
         }
     }
+
+
 
     private ArrayList<ProductType> loopGetProductTypes(List<ProductType> productTypes) {
         ArrayList<ProductType> result;//创建map建立id与实体之间的关系，之后可以在循环中直接通过id拿到对象

@@ -1,6 +1,7 @@
 package com.xer.igou.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.xer.igou.domain.Brand;
 import com.xer.igou.service.IProductTypeService;
 import com.xer.igou.domain.ProductType;
 import com.xer.igou.query.ProductTypeQuery;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/productType")
@@ -135,5 +138,33 @@ public class ProductTypeController {
     @RequestMapping(value = "/treeData", method = RequestMethod.GET)
     public List<ProductType> productTypeInfo() {
         return productTypeService.getDataTree();
+    }
+
+    /**
+     * 获取面包屑
+     */
+    @RequestMapping(value = "/crumbles/{id}", method = RequestMethod.GET)
+    public List<Map<String,Object>> crumbles(@PathVariable(value = "id", required = true) Long productTypeId) {
+        return productTypeService.getCrumbles(productTypeId);
+    }
+
+    /**
+     * 获取品牌信息
+     * @param productTypeId
+     * @return
+     */
+    @RequestMapping(value = "/brands/{id}", method = RequestMethod.GET)
+    public List<Brand> brands(@PathVariable(value = "id", required = true) Long productTypeId) {
+        return productTypeService.getBrands(productTypeId);
+    }
+
+    /**
+     * 获取商品品牌首字母
+     * @param productTypeId
+     * @return
+     */
+    @RequestMapping(value = "/letters/{id}", method = RequestMethod.GET)
+    public Set<String> letters(@PathVariable(value = "id", required = true) Long productTypeId) {
+        return productTypeService.getBrandsFirstLetters(productTypeId);
     }
 }

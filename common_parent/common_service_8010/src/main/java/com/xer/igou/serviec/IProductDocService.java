@@ -1,8 +1,11 @@
 package com.xer.igou.serviec;
 
-import com.xer.igou.client.ProductDoc;
+import com.xer.igou.index.ProductDoc;
+import com.xer.igou.util.PageList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface IProductDocService {
     /**
@@ -30,15 +33,8 @@ public interface IProductDocService {
     void delBatch(List<ProductDoc> ids);
 
     /**
-     * 获取
-     * @param id
+     * 获取查询数据
      * @return
      */
-    ProductDoc get(Long id);
-
-    /**
-     * 获取列表
-     * @return
-     */
-    List<ProductDoc> getList();
+    PageList<Map<String,Object>> search(Map<String,Object> map);
 }

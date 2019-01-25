@@ -1,6 +1,8 @@
 package com.xer.igou.client;
 
+import com.xer.igou.index.ProductDoc;
 import com.xer.igou.util.AjaxResult;
+import com.xer.igou.util.PageList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(value = "COMMON-SERVICE",fallbackFactory = ProductDocClientFallbackFactory.class )
 public interface ProductDocClient {
@@ -23,9 +26,7 @@ public interface ProductDocClient {
     @RequestMapping(value = "/delBatch",method = RequestMethod.POST)
     AjaxResult delBatch(@RequestBody List<ProductDoc> ids);
 
-    @RequestMapping(value = "/get",method = RequestMethod.GET)
-    ProductDoc get(@RequestParam(value = "id") Long id);
+    @RequestMapping(value = "/search",method = RequestMethod.POST)
+    PageList<Map<String,Object>> search(@RequestBody Map<String,Object> map);
 
-    @RequestMapping(value = "/getList",method = RequestMethod.GET)
-    List<ProductDoc> getList();
 }

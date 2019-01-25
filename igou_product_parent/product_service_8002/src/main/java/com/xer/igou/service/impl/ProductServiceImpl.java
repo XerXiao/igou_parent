@@ -1,8 +1,5 @@
 package com.xer.igou.service.impl;
 
-import com.google.common.collect.Lists;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.alibaba.fastjson.JSON;
@@ -10,8 +7,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.sun.org.apache.xerces.internal.xs.datatypes.ObjectList;
-import com.xer.igou.client.ProductDoc;
+import com.xer.igou.index.ProductDoc;
 import com.xer.igou.client.ProductDocClient;
 import com.xer.igou.client.RedisClient;
 import com.xer.igou.domain.*;
@@ -19,9 +15,7 @@ import com.xer.igou.mapper.*;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.service.IProductService;
 import com.xer.igou.util.PageList;
-import net.sf.jsqlparser.statement.select.ValuesList;
 import org.apache.commons.lang.StringUtils;
-import org.aspectj.weaver.ast.Instanceof;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -131,9 +125,20 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         Product product = productMapper.selectById(productId);
         product.setSkuTemplate(pro);
-//        修改商品
-        productMapper.updateById(product);
 
+
+        //获取该商品之前的sku全部清除
+        List<Sku> products = skuMapper.selectList(new EntityWrapper<Sku>().eq("productId", productId));
+        if(!products.isEmpty()) {
+            List<Long> list = new ArrayList<>();
+            for (Sku sku : products) {
+                list.add(sku.getId());
+            }
+            skuMapper.deleteBatchIds(list);
+        }
+        //设置标志值获取最高最低价格
+        int min = 999999;
+        int max = 0;
         for (Map<String, Object> sku : skus) {
             Set<String> keys = sku.keySet();
             StringBuffer stringBuffer = new StringBuffer();
@@ -141,16 +146,21 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             skuObj.setProductId(productId.longValue());
             StringBuffer idSb = new StringBuffer();
 
-            keys.forEach(key -> {
+
+            for (String key : keys) {
                 switch (key) {
                     case "price":
-                        skuObj.setPrice(Integer.valueOf((String) sku.get(key))*100);
+                        int price = Integer.valueOf(sku.get(key).toString());
+                        min = price < (min) ? price : min;
+                        max = price > (max) ? price : max;
+
+                        skuObj.setPrice(price*100);
                         break;
                     case "availableStock":
-                        skuObj.setAvailableStock(Integer.valueOf((String) sku.get(key)));
+                        skuObj.setAvailableStock(Integer.valueOf(sku.get(key).toString()));
                         break;
                     case "state":
-                        if ((Integer) sku.get(key) == 0) {
+                        if ("true".equals(sku.get(key).toString())) {
                             skuObj.setState(true);
                         } else {
                             skuObj.setState(false);
@@ -169,12 +179,25 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                         idSb.append(valuesId).append("_");
                         stringBuffer.append(key + ":").append(value + "_");
                 }
-            });
+            }
             skuObj.setSkuVlaues(stringBuffer.toString().substring(0, stringBuffer.toString().lastIndexOf("_")));
             //保存数据到sku表
             skuObj.setIndex(idSb.toString().substring(0, idSb.toString().lastIndexOf("_")));
+
             skuMapper.insert(skuObj);
         }
+
+        product.setMinPrice(min*100);
+        product.setMaxPrice(max*100);
+        //        修改商品
+        productMapper.updateById(product);
+
+        //如果商品处于上架状态需要同步更新ES
+        if(product.getState() == 1) {
+            ProductDoc productDoc = product2productDoc(product);
+            productDocClient.add(productDoc);
+        }
+        redisClient.clear();
 
     }
 
@@ -191,33 +214,33 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         List<Long> longs = Arrays.asList(LongIds);
 
         //保存修改数据库
-        if(onSale == 1) {
+        if (onSale == 1) {
             //下架操作
             HashMap<String, Object> map = new HashMap<>();
-            map.put("offSaleTime",new Date());
-            map.put("ids",longs);
+            map.put("offSaleTime", new Date());
+            map.put("ids", longs);
             productMapper.offSale(map);
 
             List<ProductDoc> productDocs = new ArrayList<>();
             for (Long aLong : longs) {
                 Product product = productMapper.selectById(aLong);
-                if(product != null) {
+                if (product != null) {
                     productDocs.add(product2ProductDocList(product));
                 }
             }
             productDocClient.delBatch(productDocs);
             redisClient.clear();
-        }else {
+        } else {
             //上架操作
             HashMap<String, Object> map = new HashMap<>();
-            map.put("onSaleTime",new Date());
-            map.put("ids",longs);
+            map.put("onSaleTime", new Date());
+            map.put("ids", longs);
             productMapper.onSale(map);
             List<ProductDoc> productDocs = new ArrayList<>();
             for (Long aLong : longs) {
                 Product product = productMapper.selectById(aLong);
-                if(product != null) {
-                   productDocs.add(product2ProductDocList(product));
+                if (product != null) {
+                    productDocs.add(product2ProductDocList(product));
                 }
             }
             //插入es库
@@ -337,12 +360,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         ProductDoc productDoc = new ProductDoc();
         productDoc.setId(entity.getId());
+        productDoc.setName(entity.getName());
         productDoc.setProductTypeId(entity.getProductTypeId());
         productDoc.setBrandId(entity.getBrandId());
         productDoc.setOnsaleTime(new Date());
-        productDoc.setSaleCount(0);
-        productDoc.setViewCount(0);
-        productDoc.setCommentCount(0);
+        productDoc.setSaleCount(entity.getSaleCount());
+        productDoc.setViewCount(entity.getViewCount());
+        productDoc.setCommentCount(entity.getCommentCount());
 
         ProductType productType = productTypeMapper.selectById(entity.getProductTypeId());
         Brand brand = brandMapper.selectById(entity.getBrandId());
@@ -358,21 +382,27 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         }
         productDoc.setMedias(medias);
 
-        //获取sku遍历得到所有价格获取最大最小值
-        List<Sku> skus = skuMapper.selectList(new EntityWrapper<Sku>().eq("productId", entity.getId()));
-        Integer min = 999999999;
-        Integer max = 0;
-        for (Sku sku : skus) {
-            if(sku.getPrice() < min) {
-                min = sku.getPrice();
-            }
-            if (sku.getPrice() > max) {
-                max = sku.getPrice();
-            }
-        }
-        productDoc.setMaxPrice(max);
-        productDoc.setMinPrice(min);
-
+//        //获取sku遍历得到所有价格获取最大最小值
+//        List<Sku> skus = skuMapper.selectList(new EntityWrapper<Sku>().eq("productId", entity.getId()));
+//        if (!skus.isEmpty()) {
+//            Integer min = skus.get(0).getPrice();
+//            Integer max = skus.get(0).getPrice();
+//            for (Sku sku : skus) {
+//                if (sku.getPrice() < min) {
+//                    min = sku.getPrice();
+//                }
+//                if (sku.getPrice() > max) {
+//                    max = sku.getPrice();
+//                }
+//            }
+//            productDoc.setMaxPrice(max);
+//            productDoc.setMinPrice(min);
+//        } else {
+//            productDoc.setMaxPrice(0);
+//            productDoc.setMinPrice(0);
+//        }
+        productDoc.setMinPrice(entity.getMinPrice());
+        productDoc.setMaxPrice(entity.getMaxPrice());
         return productDoc;
     }
 
@@ -405,7 +435,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             List<ProductDoc> productDocs = new ArrayList<>();
             for (Long aLong : longs) {
                 Product product = productMapper.selectById(aLong);
-                if(product != null) {
+                if (product != null) {
                     productDocs.add(product2ProductDocList(product));
                 }
             }

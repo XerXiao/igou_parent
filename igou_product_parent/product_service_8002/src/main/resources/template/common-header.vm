@@ -13,9 +13,9 @@
 
 				</div>
 				<div class="search SZY-SEARCH-BOX">
-					<form class="search-form SZY-SEARCH-BOX-FORM" method="get" action="/list">
+					<form class="search-form SZY-SEARCH-BOX-FORM" method="get" action="/list.html">
 						<div class="search-info">
-							<div class="search-type-box">
+							<div class="search-type-blive-server --port=6002ox">
 								<ul class="search-type">
 									<li class="search-li curr" num="0">商品</li>
 									<li class="search-li" num="1">店铺</li>

@@ -1,13 +1,15 @@
 package com.xer.igou.controller;
 
-import com.xer.igou.client.ProductDoc;
+import com.xer.igou.index.ProductDoc;
 import com.xer.igou.client.ProductDocClient;
 import com.xer.igou.serviec.IProductDocService;
 import com.xer.igou.util.AjaxResult;
+import com.xer.igou.util.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ProductDocController implements ProductDocClient {
@@ -65,14 +67,8 @@ public class ProductDocController implements ProductDocClient {
     }
 
     @Override
-    @RequestMapping(value = "/get",method = RequestMethod.GET)
-    public ProductDoc get(@RequestParam(value = "id") Long id) {
-        return productDocService.get(id);
-    }
-
-    @Override
-    @RequestMapping(value = "/getList",method = RequestMethod.GET)
-    public List<ProductDoc> getList() {
-        return productDocService.getList();
+    @RequestMapping(value = "/search",method = RequestMethod.POST)
+    public PageList<Map<String,Object>> search(@RequestBody Map<String,Object> map) {
+        return productDocService.search(map);
     }
 }

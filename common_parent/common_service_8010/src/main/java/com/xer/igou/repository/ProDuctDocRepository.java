@@ -1,6 +1,6 @@
 package com.xer.igou.repository;
 
-import com.xer.igou.client.ProductDoc;
+import com.xer.igou.index.ProductDoc;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 

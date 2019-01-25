@@ -1,4 +1,4 @@
-package com.xer.igou.client;
+package com.xer.igou.index;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
@@ -19,6 +19,8 @@ public class ProductDoc {
     private Long productTypeId;
     private Long brandId;
 
+    private String name;
+
     @Field(type = FieldType.Keyword)
     private String keyword;
     private Date onsaleTime;
@@ -38,7 +40,19 @@ public class ProductDoc {
     private String viewProperties;
     @Field(type = FieldType.Keyword)
     private String skuProperties;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Field(type = FieldType.Keyword)
+
+
+
     private List<String> medias = new ArrayList<>();
 
     public Integer getMinPrice() {
