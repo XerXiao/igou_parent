@@ -82,6 +82,7 @@
         <result column="badCommentCount" property="badCommentCount"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="skuTemplate" property="skuTemplate"/>
+        <result column="media" property="media"/>
 
 
         <!--关联属性-->

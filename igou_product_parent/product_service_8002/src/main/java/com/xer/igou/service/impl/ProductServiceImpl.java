@@ -1,5 +1,6 @@
 package com.xer.igou.service.impl;
 
+import java.io.IOException;
 import java.util.Date;
 
 import com.alibaba.fastjson.JSON;
@@ -7,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.xer.igou.client.PageClient;
 import com.xer.igou.index.ProductDoc;
 import com.xer.igou.client.ProductDocClient;
 import com.xer.igou.client.RedisClient;
@@ -14,6 +16,7 @@ import com.xer.igou.domain.*;
 import com.xer.igou.mapper.*;
 import com.xer.igou.query.ProductQuery;
 import com.xer.igou.service.IProductService;
+import com.xer.igou.service.IProductTypeService;
 import com.xer.igou.util.PageList;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +58,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Autowired
     private BrandMapper brandMapper;
+
+    @Autowired
+    private PageClient pageClient;
+
+    @Autowired
+    private IProductTypeService productTypeService;
 
     /**
      * 使用缓存
@@ -245,6 +254,61 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             }
             //插入es库
             productDocClient.addBatch(productDocs);
+
+            //同步生成静态页面
+            //读取配置文件获取配置信息
+            Properties properties = new Properties();
+            try {
+                properties.load(this.getClass().getClassLoader().getResourceAsStream("staticPage.properties"));
+                for (ProductDoc productDoc : productDocs) {
+                    HashMap<String, Object> indexParams = new HashMap<>();
+                    HashMap<String, Object> staticRoot = new HashMap<>();
+                    //更新详情页静态化页面
+                    staticRoot.put("staticRoot",properties.getProperty("staticIndexPageStaticRoot"));
+                    //放入数据：类别面包屑、商品信息、规格参数、商品详情
+                    //获取商品类别面包屑
+                    List<Map<String, Object>> crumbles = productTypeService.getCrumbles(productDoc.getProductTypeId());
+                    staticRoot.put("crumbles",crumbles);
+                    //商品信息
+                    staticRoot.put("product",productDoc);
+                    //规格参数
+                    List<Specification> specifications = JSON.parseArray(productDoc.getViewProperties(), Specification.class);
+                    staticRoot.put("viewProperties",specifications);
+                    //商品详情
+                    List<ProductExt> productExts = productExtMapper.selectList(new EntityWrapper<ProductExt>().eq("productId", productDoc.getId()));
+                    if(productExts != null && !productExts.isEmpty()) {
+                        ProductExt productExt = productExts.get(0);
+                        staticRoot.put("richContent",productExt.getRichContent());
+                    }
+
+
+
+                    //sku属性选项
+                    Product product = productMapper.selectById(productDoc.getId());
+
+                    List<Specification> skuOptions = JSON.parseArray(product.getSkuTemplate(), Specification.class);
+                    if(skuOptions != null && !skuOptions.isEmpty()) {
+                        staticRoot.put("skuPropertiesLength",skuOptions.size());
+                        staticRoot.put("skuProperties",skuOptions);
+                    }
+
+                    //sku具体
+                    List<Sku> skus = skuMapper.selectList(new EntityWrapper<Sku>().eq("productId", productDoc.getId()));
+                    if(skus != null && !skus.isEmpty()) {
+                        for (Sku sku : skus) {
+                            sku.setSkuVlaues(null);
+                        }
+                    }
+                    staticRoot.put("skus",JSON.toJSONString(skus));
+
+                    indexParams.put("model",staticRoot);
+                    indexParams.put("templateFile",properties.getProperty("staticDetailPageTemplateFile"));
+                    indexParams.put("targetFile","E:/igou_web_parent/igou_shopping/pages/"+productDoc.getId()+".html");
+                    pageClient.staticIndexPage(indexParams);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             redisClient.clear();
         }
 
@@ -284,6 +348,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             //插入es库
             productDocClient.add(product2productDoc(entity));
             //保存关联表信息
+            //富文本等大字段信息
             entity.getProductExt().setProductId(entity.getId());
             productExtMapper.insert(entity.getProductExt());
             redisClient.clear();

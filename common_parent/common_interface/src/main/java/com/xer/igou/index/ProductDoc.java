@@ -50,10 +50,8 @@ public class ProductDoc {
     }
 
     @Field(type = FieldType.Keyword)
-
-
-
     private List<String> medias = new ArrayList<>();
+
 
     public Integer getMinPrice() {
         return minPrice;

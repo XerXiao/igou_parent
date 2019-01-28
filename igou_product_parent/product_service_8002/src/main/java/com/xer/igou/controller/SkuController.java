@@ -113,4 +113,10 @@ public class SkuController {
             page = skuService.selectPage(page);
             return new PageList<Sku>(page.getTotal(),page.getRecords());
     }
+
+
+    @RequestMapping(value = "/stock/{id}",method = RequestMethod.GET)
+    public Integer stock(@PathVariable(value = "id") Long id){
+        return skuService.selectById(id).getAvailableStock();
+    }
 }

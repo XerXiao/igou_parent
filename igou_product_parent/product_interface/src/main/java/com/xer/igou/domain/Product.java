@@ -80,7 +80,7 @@ public class Product extends Model<Product> {
     /**
      * 状态
      */
-    private Integer state;
+    private Integer state = 0;
 
     /**
      * 媒体数据
